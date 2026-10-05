@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Shape Board">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+[hidden]{display:none!important}
+</style>
+<title>2-3-1 Shape Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Big+Shoulders+Display:wght@700;800;900&display=swap">
+<style>
+/* Layout: phone-first tactics board. The pitch is the hero; possession sits in the header,
+   the follow chips and coaching card sit under the pitch and move to a side column on wide screens. */
+:root{
+  /* page */
+  --bg:#e6ebe6;
+  --surface:#f7f9f6;
+  --ink:#122018;
+  --ink-soft:#4a5b51;
+  --rule:#c5cfc7;
+  --focus:#1b51bd;
+  /* teams: practice pinnies */
+  --team-blue:#2462dc;
+  --team-orange:#ff7b22;
+  --on-blue:#ffffff;
+  --on-orange:#2b1405;
+  --blue-ink:#1b51bd;
+  --orange-ink:#a83f08;
+  --tint-blue:#b9cfff;
+  --tint-orange:#ffcaa3;
+  /* pitch */
+  --grass-a:#2f7c3d;
+  --grass-b:#2a7237;
+  --grass-edge:#23602e;
+  --pitch-line:#f2f7f0;
+  --chalk:#f6e04b;
+  --shadow:#0b2412;
+  --ball:#fbfbf6;
+  --ball-ink:#1c211e;
+  /* type */
+  --font-display:"Big Shoulders Display","Arial Narrow","Roboto Condensed",sans-serif;
+  --font-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0c130f;--surface:#151f19;--ink:#e3ece5;--ink-soft:#9aab9f;--rule:#2a3830;--focus:#86a9ff;
+    --blue-ink:#8eb0ff;--orange-ink:#ffa066;
+    --grass-a:#2a6f37;--grass-b:#266633;--grass-edge:#1b4d25;--pitch-line:#e8f0e6;--chalk:#ecd645;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c130f;--surface:#151f19;--ink:#e3ece5;--ink-soft:#9aab9f;--rule:#2a3830;--focus:#86a9ff;
+  --blue-ink:#8eb0ff;--orange-ink:#ffa066;
+  --grass-a:#2a6f37;--grass-b:#266633;--grass-edge:#1b4d25;--pitch-line:#e8f0e6;--chalk:#ecd645;
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.45;-webkit-tap-highlight-color:transparent}
+button,select,input{font:inherit;color:inherit}
+button{touch-action:manipulation}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+.app{max-width:1120px;margin:0 auto;padding-inline:16px;padding-block:12px 28px;display:flex;flex-direction:column;gap:12px}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px 16px;flex-wrap:wrap}
+.brand{min-width:0}
+.brand h1{margin:0;font-family:var(--font-display);font-weight:900;font-size:1.75rem;line-height:.9;letter-spacing:.005em;text-transform:uppercase;text-wrap:balance}
+.brand p{margin:4px 0 0;font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.poss{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:var(--surface);border:1px solid var(--rule)}
+.poss button{appearance:none;border:0;background:transparent;color:var(--ink-soft);font-family:var(--font-display);font-weight:800;font-size:1.02rem;line-height:1;letter-spacing:.06em;text-transform:uppercase;padding:9px 12px;min-height:38px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;cursor:pointer;transition:background-color .2s,color .2s}
+.poss .sw{width:10px;height:10px;border-radius:50%;flex:none}
+.poss [data-team="blue"] .sw{background:var(--team-blue)}
+.poss [data-team="orange"] .sw{background:var(--team-orange)}
+.poss [aria-pressed="true"][data-team="blue"]{background:var(--team-blue);color:var(--on-blue)}
+.poss [aria-pressed="true"][data-team="orange"]{background:var(--team-orange);color:var(--on-orange)}
+.poss [aria-pressed="true"] .sw{background:currentColor}
+@media (max-width:560px){
+  .poss{width:100%}
+  .poss button{flex:1;justify-content:center}
+}
+
+.forms{display:flex;gap:8px 14px;flex-wrap:wrap}
+.form{display:inline-flex;align-items:center;gap:7px;font-size:.9rem;font-weight:700;flex:1 1 0;min-width:0}
+.form .sw{width:10px;height:10px;border-radius:50%;flex:none}
+.form .sw.blue{background:var(--team-blue)}
+.form .sw.orange{background:var(--team-orange)}
+.form select{flex:1;min-width:0;font-size:.95rem;font-weight:400;padding:7px 8px;min-height:38px;border-radius:8px;border:1px solid var(--rule);background:var(--surface);color:var(--ink)}
+@media (min-width:860px){.form{flex:0 0 auto}.form select{flex:none}}
+/* field */
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:start}
+.board-col{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.board{width:min(100%,max(270px,calc((100vh - 240px) * .6818)));max-width:100%;aspect-ratio:45/66}
+@supports (height:100svh){.board{width:min(100%,max(270px,calc((100svh - 240px) * .6818)))}}
+#pitch{display:block;width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;border-radius:12px;outline:none}
+#pitch.grabbing{cursor:grabbing}
+#pitch:focus-visible{box-shadow:0 0 0 3px var(--bg),0 0 0 6px var(--focus)}
+.hint{margin:0;font-size:.8rem;line-height:1.35;color:var(--ink-soft);text-align:center;max-width:46ch;text-wrap:balance}
+
+.g-edge{fill:var(--grass-edge)}
+.g-a{fill:var(--grass-a)}
+.g-b{fill:var(--grass-b)}
+.ln{fill:none;stroke:var(--pitch-line);stroke-width:2.4;opacity:.92}
+.ln-dot{fill:var(--pitch-line);opacity:.92}
+.net{fill:url(#net);stroke:var(--pitch-line);stroke-width:2}
+.net-mesh{stroke:var(--pitch-line);stroke-width:.6;opacity:.55;fill:none}
+.bol{stroke:var(--chalk);stroke-width:2.6;stroke-dasharray:11 7;opacity:.95}
+.bol-txt{fill:var(--chalk);font-family:var(--font-display);font-weight:800;font-size:10.5px;letter-spacing:1.2px;text-anchor:middle}
+.goal-txt{fill:var(--pitch-line);opacity:.8;font-family:var(--font-display);font-weight:800;font-size:11px;letter-spacing:1.4px}
+
+.hull{stroke-width:2;stroke-dasharray:7 5;stroke-linejoin:round}
+.hull.blue{fill:var(--team-blue);fill-opacity:.15;stroke:var(--tint-blue)}
+.hull.orange{fill:var(--team-orange);fill-opacity:.18;stroke:var(--tint-orange)}
+.unit{fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.unit.blue{stroke:var(--tint-blue)}
+.unit.orange{stroke:var(--tint-orange)}
+#pitch.noshape #hulls,#pitch.noshape #units{display:none}
+#hulls,#units{transition:opacity .25s}
+#pitch.following #hulls,#pitch.following #units{opacity:.3}
+
+.ghost{fill:none;stroke-width:2.4;stroke-dasharray:4.5 3.5}
+.ghost.blue{stroke:var(--tint-blue)}
+.ghost.orange{stroke:var(--tint-orange)}
+.shift{stroke-width:2.6;stroke-linecap:round;fill:none}
+.shift.blue{stroke:var(--tint-blue)}
+.shift.orange{stroke:var(--tint-orange)}
+.ah-blue{fill:var(--tint-blue)}
+.ah-orange{fill:var(--tint-orange)}
+
+.pl{cursor:pointer;transition:opacity .25s}
+.pl .sh{fill:var(--shadow);opacity:.35}
+.pl .body{stroke:var(--pitch-line);stroke-width:2.6}
+.pl.blue .body{fill:var(--team-blue)}
+.pl.orange .body{fill:var(--team-orange)}
+.pl .lbl{font-family:var(--font-display);font-weight:900;font-size:13.5px;letter-spacing:.3px;text-anchor:middle;pointer-events:none}
+.pl.blue .lbl{fill:var(--on-blue)}
+.pl.orange .lbl{fill:var(--on-orange)}
+.pl .halo{fill:none;stroke:var(--pitch-line);stroke-width:3;opacity:0;transition:opacity .25s}
+.pl.on .halo{opacity:1}
+#pitch.following .pl:not(.on){opacity:.45}
+
+.ball-body{fill:var(--ball);stroke:var(--ball-ink);stroke-width:1.1}
+.ball-patch{fill:var(--ball-ink)}
+.ball-seam{stroke:var(--ball-ink);stroke-width:.9;fill:none}
+.ball-shadow{fill:var(--shadow);opacity:.4}
+.ball-pulse{fill:none;stroke:var(--ball);stroke-width:2;opacity:0;transform-box:fill-box;transform-origin:center}
+#pitch.idle .ball-pulse{animation:pulse 1.6s ease-out infinite}
+@keyframes pulse{0%{transform:scale(.6);opacity:.95}100%{transform:scale(1.9);opacity:0}}
+
+/* panel */
+.panel{display:flex;flex-direction:column;gap:12px;min-width:0;width:100%}
+.follow{display:flex;flex-direction:column;gap:6px}
+.follow-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.follow-head .switch{min-height:30px;font-size:.86rem;color:var(--ink-soft)}
+.label{font-family:var(--font-display);font-weight:800;font-size:.9rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(40px,1fr));gap:4px}
+.chip{appearance:none;border:1.5px solid var(--rule);background:var(--surface);color:var(--ink);font-family:var(--font-display);font-weight:800;font-size:1.05rem;letter-spacing:.04em;line-height:1;padding:9px 0;min-height:40px;border-radius:8px;cursor:pointer;min-width:0}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:12px 14px 13px;display:flex;flex-direction:column;gap:12px}
+.status{margin:0;font-size:.84rem;line-height:1.35;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start}
+.status svg{flex:none;margin-top:1px}
+.rows{display:flex;flex-direction:column;gap:12px}
+.row{display:grid;grid-template-columns:5.4rem minmax(0,1fr);column-gap:10px;row-gap:3px;align-items:start}
+.tag{grid-row:span 2;font-family:var(--font-display);font-weight:900;font-size:.98rem;letter-spacing:.06em;text-transform:uppercase;line-height:1.05;padding:7px 6px;border-radius:6px;text-align:center}
+.tag.blue{background:var(--team-blue);color:var(--on-blue)}
+.tag.orange{background:var(--team-orange);color:var(--on-orange)}
+.mode{font-family:var(--font-display);font-weight:800;font-size:.9rem;letter-spacing:.09em;text-transform:uppercase;line-height:1.15}
+.mode.blue{color:var(--blue-ink)}
+.mode.orange{color:var(--orange-ink)}
+.row p{margin:0;font-size:.96rem;line-height:1.42}
+.row .size{display:block;margin-top:4px;font-size:.8rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.legend{margin:0;padding-top:10px;border-top:1px dashed var(--rule);font-size:.8rem;line-height:1.35;color:var(--ink-soft);display:flex;gap:9px;align-items:center}
+.legend svg{flex:none}
+.legend .lg-ring{fill:none;stroke:var(--ink-soft);stroke-width:1.6;stroke-dasharray:3 2.4}
+.legend .lg-arrow{stroke:var(--ink-soft);stroke-width:1.8;fill:none;stroke-linecap:round}
+.legend .lg-head{fill:var(--ink-soft)}
+.legend .lg-dot{fill:var(--ink-soft)}
+
+.controls{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
+.switch{display:inline-flex;align-items:center;gap:7px;font-size:.9rem;cursor:pointer;min-height:38px}
+.switch input{width:18px;height:18px;margin:0;accent-color:var(--team-blue)}
+.pick{display:inline-flex;align-items:center;gap:7px;font-size:.9rem}
+.pick select{font-size:.9rem;padding:7px 8px;min-height:38px;border-radius:8px;border:1px solid var(--rule);background:var(--surface);color:var(--ink)}
+.btn{appearance:none;border:1px solid var(--rule);background:transparent;color:var(--ink);font-weight:700;font-size:.9rem;padding:8px 14px;min-height:38px;border-radius:8px;cursor:pointer}
+.btn:hover,.chip:hover{border-color:var(--ink-soft)}
+.note{margin:0;font-size:.76rem;line-height:1.4;color:var(--ink-soft)}
+
+@media (min-width:860px){
+  .app{padding-block:20px 32px;width:fit-content;max-width:100%}
+  .layout{grid-template-columns:auto minmax(320px,380px);justify-content:center;gap:28px}
+  .board{width:clamp(300px,calc((100vh - 190px) * .6818),calc(100vw - 480px))}
+  @supports (height:100svh){.board{width:clamp(300px,calc((100svh - 190px) * .6818),calc(100vw - 480px))}}
+  .panel{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+}
+@media (prefers-reduced-motion: reduce){
+  #pitch.idle .ball-pulse{animation:none;opacity:.6;transform:scale(1.2)}
+  .pl,.pl .halo,#hulls,#units,.poss button{transition:none}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <h1>2-3-1 Shape Board</h1>
+      <p>7v7 · pick each team's formation</p>
+    </div>
+    <div class="poss" role="group" aria-label="Who has the ball">
+      <button type="button" id="poss-blue" data-team="blue" aria-pressed="true"><span class="sw" aria-hidden="true"></span>Blue ball</button>
+      <button type="button" id="poss-orange" data-team="orange" aria-pressed="false"><span class="sw" aria-hidden="true"></span>Orange ball</button>
+    </div>
+  </header>
+  <div class="forms" role="group" aria-label="Formations">
+    <label class="form" for="form-blue"><span class="sw blue" aria-hidden="true"></span>Blue <select id="form-blue"></select></label>
+    <label class="form" for="form-orange"><span class="sw orange" aria-hidden="true"></span>Orange <select id="form-orange"></select></label>
+  </div>
+
+  <main class="layout">
+    <section class="board-col" aria-label="Field">
+      <div class="board">
+        <svg id="pitch" class="idle" viewBox="-25 -30 450 660" role="application" tabindex="0" aria-roledescription="soccer field" aria-label="7v7 field. Drag the ball, or focus here and use the arrow keys to move it." aria-describedby="status">
+          <defs>
+            <pattern id="net" width="6" height="6" patternUnits="userSpaceOnUse"><path class="net-mesh" d="M0 0L6 6M6 0L0 6"/></pattern>
+            <marker id="ah-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="3.6" markerHeight="3.6" orient="auto"><path class="ah-blue" d="M0 0L10 5L0 10z"/></marker>
+            <marker id="ah-orange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="3.6" markerHeight="3.6" orient="auto"><path class="ah-orange" d="M0 0L10 5L0 10z"/></marker>
+          </defs>
+          <rect class="g-edge" x="-25" y="-30" width="450" height="660"/>
+          <rect class="g-a" x="0" y="0" width="400" height="600"/>
+          <rect class="g-b" x="0" y="50" width="400" height="50"/>
+          <rect class="g-b" x="0" y="150" width="400" height="50"/>
+          <rect class="g-b" x="0" y="250" width="400" height="50"/>
+          <rect class="g-b" x="0" y="350" width="400" height="50"/>
+          <rect class="g-b" x="0" y="450" width="400" height="50"/>
+          <rect class="g-b" x="0" y="550" width="400" height="50"/>
+          <g class="ln">
+            <rect x="0" y="0" width="400" height="600"/>
+            <line x1="0" y1="300" x2="400" y2="300"/>
+            <circle cx="200" cy="300" r="60"/>
+            <rect x="70" y="0" width="260" height="120"/>
+            <rect x="70" y="480" width="260" height="120"/>
+            <path d="M10 0A10 10 0 0 1 0 10M390 0A10 10 0 0 0 400 10M0 590A10 10 0 0 1 10 600M400 590A10 10 0 0 0 390 600"/>
+          </g>
+          <circle class="ln-dot" cx="200" cy="300" r="3"/>
+          <rect class="net" x="169.2" y="-16" width="61.6" height="16"/>
+          <rect class="net" x="169.2" y="600" width="61.6" height="16"/>
+          <line class="bol" x1="0" y1="210" x2="400" y2="210"/>
+          <line class="bol" x1="0" y1="390" x2="400" y2="390"/>
+          <text class="bol-txt" transform="translate(411 210) rotate(90)">BUILD-OUT</text>
+          <text class="bol-txt" transform="translate(411 390) rotate(90)">BUILD-OUT</text>
+          <text class="goal-txt" x="160" y="-9" text-anchor="end">ORANGE GOAL</text>
+          <text class="goal-txt" x="160" y="619" text-anchor="end">BLUE GOAL</text>
+          <g id="hulls"></g>
+          <g id="units"></g>
+          <g id="ghosts"></g>
+          <g id="players"></g>
+          <g id="ball" pointer-events="none">
+            <circle class="ball-pulse" r="15"/>
+            <circle class="ball-shadow" cx="1.6" cy="2.6" r="8.6"/>
+            <circle class="ball-body" r="8.6"/>
+            <path class="ball-seam" d="M0 -3.7L0 -8.2M3.52 -1.14L7.9 -2.6M2.17 2.99L4.9 6.8M-2.17 2.99L-4.9 6.8M-3.52 -1.14L-7.9 -2.6"/>
+            <path class="ball-patch" d="M0 -3.7L3.52 -1.14L2.17 2.99L-2.17 2.99L-3.52 -1.14Z"/>
+          </g>
+        </svg>
+      </div>
+      <p class="hint">Drag the ball to move it. Tap any player to give them the ball. Tap a keeper for a goal kick.</p>
+    </section>
+
+    <section class="panel" aria-label="Coaching">
+      <div class="follow">
+        <div class="follow-head">
+          <div class="label" id="follow-label">Follow a position</div>
+          <label class="switch" for="shape"><input type="checkbox" id="shape" checked> Team shape</label>
+        </div>
+        <div class="chips" id="chips" role="group" aria-labelledby="follow-label"></div>
+      </div>
+
+      <div class="card">
+        <p class="status" id="status"></p>
+        <div class="rows" id="rows"></div>
+        <p class="legend" id="legend" hidden>
+          <svg width="46" height="22" viewBox="0 0 46 22" aria-hidden="true">
+            <circle class="lg-ring" cx="10" cy="11" r="8"/>
+            <line class="lg-arrow" x1="19" y1="11" x2="31" y2="11"/>
+            <path class="lg-head" d="M30 6.5L36 11L30 15.5z"/>
+            <circle class="lg-dot" cx="40" cy="11" r="5"/>
+          </svg>
+          <span>Dotted ring: where they stand when the ball is in the center circle. The arrow shows how far the ball's position moved them.</span>
+        </p>
+      </div>
+
+      <div class="controls">
+        <label class="pick" for="carrier">Ball with <select id="carrier"></select></label>
+        <button type="button" class="btn" id="reset">Reset</button>
+      </div>
+      <p class="note">Field drawn 60 × 40 yd. Build-out lines sit halfway between the penalty box and midfield, and in 7v7 nobody can be offside between halfway and the build-out line.</p>
+    </section>
+  </main>
+  <div class="sr" aria-live="polite" id="live"></div>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+/* ---------- field geometry (yards) ---------- */
+const L = 60, W = 40, HW = 20;
+const PA_D = 12, PA_HW = 13;
+const BOL = 21;
+const GOAL_HW = 3.08;
+const CARRY = 2.1;
+const S = 10;
+
+const TEAMS = ["blue", "orange"];
+const TEAM = { blue: "Blue", orange: "Orange" };
+const NAMES = { GK: "Goalkeeper", LB: "Left back", CB: "Center back", RB: "Right back", DM: "Holding mid", LM: "Left mid", CM: "Center mid", RM: "Right mid", AM: "Attacking mid", LS: "Left striker", ST: "Striker", RS: "Right striker" };
+const ORDER = ["GK", "LB", "CB", "RB", "DM", "LM", "CM", "RM", "AM", "LS", "ST", "RS"];
+
+/* ---------- formations: each field player has a kind and a side (-1 left, 1 right, 0 center) ---------- */
+const R = (id, kind, s = 0) => ({ id, kind, s });
+const FORMS = {
+  "2-3-1": [R("LB", "back", -1), R("RB", "back", 1), R("LM", "wing", -1), R("CM", "cmid"), R("RM", "wing", 1), R("ST", "st")],
+  "3-2-1": [R("LB", "back", -1), R("CB", "cback"), R("RB", "back", 1), R("LM", "imid", -1), R("RM", "imid", 1), R("ST", "st")],
+  "2-1-2-1": [R("LB", "back", -1), R("RB", "back", 1), R("DM", "dmid"), R("LM", "wing", -1), R("RM", "wing", 1), R("ST", "st")],
+  "3-1-2": [R("LB", "back", -1), R("CB", "cback"), R("RB", "back", 1), R("CM", "cmid"), R("LS", "st", -1), R("RS", "st", 1)],
+  "3-1-1-1": [R("LB", "back", -1), R("CB", "cback"), R("RB", "back", 1), R("DM", "dmid"), R("AM", "amid"), R("ST", "st")]
+};
+const FORM_LIST = ["2-3-1", "3-2-1", "2-1-2-1", "3-1-2", "3-1-1-1"];
+const fieldIds = f => FORMS[f].map(r => r.id);
+const rolesOf = f => ["GK", ...fieldIds(f)];
+const blockIds = f => FORMS[f].filter(r => r.kind !== "st").map(r => r.id);
+const central = f => { const F = FORMS[f]; return (F.find(r => r.kind === "cmid") || F.find(r => r.kind === "dmid") || F.find(r => r.kind === "imid")).id; };
+
+const ATT_TEAM = "Make the field big. Someone wide on each side, someone high, and always someone open near the ball.";
+const DEF_TEAM = "Make the field small. Squeeze toward the ball, stay goal-side, and the closest player presses.";
+
+const ATT_TIPS = {
+  "carrier": "You have the ball. Get your head up, then pass, dribble, or shoot.",
+  "carrier-bo": "Goal kick or ball in your hands. The other team has to back up behind the build-out line, so take your time and pass to an open defender.",
+  "gk-safe": "Stay behind your defenders as the safe back pass. Talk to them and tell them where the pressure is coming from.",
+  "gk-sweep": "Step up toward the top of your box. If they kick it long, you can sweep it up.",
+  "back-split": "Split wide to the edge of the box so the keeper has an easy pass. Open your body to face up the field.",
+  "back-support": "Stay behind the ball on this side, so the player on the ball always has a safe pass back.",
+  "back-rest": "Tuck in toward the middle and stay back. If we lose the ball, you're the first one between their striker and our goal.",
+  "back-mid": "Push up with the team but stay behind the ball. Keep a big gap from your partner so we have passing angles.",
+  "back-wide": "You're the width on this side. Get wide and push up level with the ball, so there's a pass down the line.",
+  "back-far": "Stay wide on the far side, a little behind the ball. That space is open if we switch it.",
+  "back-width": "Stay wide near the sideline. With three at the back, the outside backs make the field big.",
+  "cb-show": "Stand near the top of the box in the middle. You're the keeper's short pass if the wide players are covered.",
+  "cb-anchor": "Stay in the middle behind the ball. You're the safe pass back, and the first defender if we lose it.",
+  "cm-show": "Show for the ball in the middle, just outside the box. Check your shoulder so you can turn.",
+  "cm-support": "Stay a few steps from the ball at an angle, so there's always an open pass. Don't hide behind a defender.",
+  "cm-cover": "A defender went forward with the ball. Drop back and fill their spot until they get back.",
+  "dm-behind": "Stay behind the ball in the middle. You're the safe pass back, and you stop the counter if we lose it.",
+  "imid-ahead": "Get ahead of the ball, into the space between their midfield and their defense.",
+  "imid-level": "Stay a pass away in the middle, open to the ball. One of you goes ahead of it and one stays behind.",
+  "am-between": "Find the space between their midfield and their defense. Stand side-on so you can turn and face their goal.",
+  "wing-wide": "Stay wide, almost on the sideline. Width makes the field big and pulls their defense apart.",
+  "wing-ahead": "Stay wide and get ahead of the ball. Give a pass option down the line.",
+  "wing-far": "Stay wide on the far side. That space is wide open if we switch the ball.",
+  "wing-backpost": "The ball is on the other wing near their goal. Crash the back post for the cross.",
+  "wing-run": "Our striker came back to get the ball. Run into the space they left.",
+  "st-high": "Stay high, on the last defender's shoulder, to push their defense back. In 7v7 you can't be offside until you're past their build-out line.",
+  "st-pair": "Stay high and split apart from your strike partner, so their defenders can't guard you both. In 7v7 you can't be offside until you're past their build-out line.",
+  "st-nearpost": "The ball is out wide near their goal. Attack the near post for the cross.",
+  "st-backpost": "The ball is out wide on the other side. Attack the back post for the cross."
+};
+const DEF_TIPS = {
+  "press": "You're the closest, so you press. Get between the ball and our goal, slow them down, and stay on your feet.",
+  "cover": "Back up the teammate who's pressing. Stay a few steps behind them, between the ball and our goal.",
+  "gk-angle": "Stay on the line between the ball and the middle of your goal. The closer the ball gets, the closer you stay to your line.",
+  "gk-sweep": "The ball is far away. Move up toward the top of the box so you can sweep up a long ball.",
+  "hold-bol": "Hold your line near our build-out line. Their striker can't be offside before it, so pushing past it only leaves space behind you.",
+  "back-ball": "Shift toward the ball and stay goal-side. Be ready to step up if they dribble at you.",
+  "back-tuck": "Tuck in toward the middle. Protect the goal first; the far side can wait.",
+  "back-mid": "Stay goal-side of their striker and close to the defender next to you, about 10 yards apart.",
+  "cb-center": "Stay in the middle of the back line, between the ball and our goal. You cover behind whoever steps up.",
+  "screen": "Stay in the middle, in front of our defenders. Block passes through the center.",
+  "screen2": "Stay close to your midfield partner, in front of our defenders. Slide toward the ball together and block passes through the middle.",
+  "am-def": "Drop back in front of our holding mid. Block the pass into their center mid and be ready to press.",
+  "wing-squeeze": "Squeeze toward the ball and block the pass down the line.",
+  "wing-tuck": "Tuck in toward the middle. Make the field small; the far sideline can wait.",
+  "wing-narrow": "Stay narrow and level with the other midfielders. Don't leave big gaps between you.",
+  "st-lead": "Lead the press. Curve your run so they can only pass one way.",
+  "st-counter": "Stay near halfway. Block the pass back to their defenders and be ready to break when we win it.",
+  "bo-wait": "Their keeper has the ball. Stay behind the build-out line until it's played, then press.",
+  "st-bol": "Wait right on the build-out line. As soon as the keeper passes, sprint to press."
+};
+
+/* ---------- helpers ---------- */
+const other = t => (t === "blue" ? "orange" : "blue");
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const sgn = x => (x > 0 ? 1 : x < 0 ? -1 : 0);
+const unit = (u, v) => { const l = Math.hypot(u, v) || 1; return { u: u / l, v: v / l }; };
+const d2 = (a, b) => (a.u - b.u) ** 2 + (a.v - b.v) ** 2;
+// Team frame: u = yards from own goal line toward the other goal, v = sideways (negative = the team's left).
+const toField = (t, u, v) => (t === "blue" ? { x: HW + v, y: L - u } : { x: HW - v, y: u });
+const toTeam = (t, x, y) => (t === "blue" ? { u: L - y, v: x - HW } : { u: y, v: HW - x });
+const clampBall = p => ({ x: clamp(p.x, 0.6, W - 0.6), y: clamp(p.y, 0.6, L - 0.6) });
+
+/* ---------- defending shape ---------- */
+function defend(B, buildOut, form) {
+  const F = FORMS[form], bu = B.u, bv = B.v, T = {};
+  const has = k => F.some(r => r.kind === k);
+  const three = has("cback"), hasDM = has("dmid");
+  const dist = Math.hypot(bu, bv) || 1, d = clamp(1 + 0.25 * dist, 1.5, 11);
+  T.GK = { u: Math.max(1, (bu / dist) * d), v: clamp((bv / dist) * d, -GOAL_HW - 0.8, GOAL_HW + 0.8), job: dist > 32 ? "gk-sweep" : "gk-angle" };
+
+  let uDL = clamp(3 + 0.42 * bu, 3.5, BOL - 1);
+  uDL = Math.min(uDL, Math.max(bu - 1.5, 2.5));
+  const uML = Math.max(uDL + (hasDM ? 7 : 4), Math.min(bu - 3, uDL + 10));
+  const uST = clamp(bu - 3, 25, 44);
+  const far = bu > 38, wide = Math.abs(bv) > 6;
+  const shift = 0.55 * bv, cmv = clamp(0.6 * bv, -9, 9);
+  const bw = three ? 9 : 6;
+
+  for (const r of F) {
+    const same = sgn(bv) === r.s;
+    switch (r.kind) {
+      case "back": T[r.id] = { u: uDL, v: clamp(shift + r.s * bw, -16, 16), job: far ? "hold-bol" : wide ? (same ? "back-ball" : "back-tuck") : "back-mid" }; break;
+      case "cback": T[r.id] = { u: Math.max(2.5, uDL - 1), v: clamp(shift, -8, 8), job: far ? "hold-bol" : "cb-center" }; break;
+      case "dmid": T[r.id] = { u: lerp(uDL, uML, 0.5), v: cmv, job: "screen" }; break;
+      case "wing": T[r.id] = { u: uML, v: clamp(cmv + r.s * (hasDM ? 7.5 : 9), -HW + 2, HW - 2), job: wide ? (same ? "wing-squeeze" : "wing-tuck") : "wing-narrow" }; break;
+      case "imid": T[r.id] = { u: uML, v: clamp(cmv + r.s * 5, -HW + 2, HW - 2), job: "screen2" }; break;
+      case "cmid": T[r.id] = { u: uML, v: cmv, job: "screen" }; break;
+      case "amid": T[r.id] = { u: uML, v: cmv, job: "am-def" }; break;
+      case "st": T[r.id] = { u: uST, v: clamp(0.6 * bv + r.s * 6, -13, 13), job: far ? "st-lead" : "st-counter" }; break;
+    }
+  }
+
+  if (buildOut) {
+    const lim = L - BOL - 0.8;
+    for (const r of F) {
+      const p = T[r.id];
+      if (r.kind === "st") { p.u = lim; p.job = "st-bol"; }
+      else if (r.kind === "back" || r.kind === "cback") p.job = "hold-bol";
+      else { p.u = Math.max(p.u, L - BOL - (r.kind === "dmid" ? 11 : 6)); p.job = "bo-wait"; }
+      p.u = Math.min(p.u, lim);
+    }
+  } else {
+    const kind = {}; for (const r of F) kind[r.id] = r.kind;
+    const order = F.map(r => r.id).sort((a, b) => d2(T[a], B) - d2(T[b], B));
+    const g = unit(-bu, -bv);
+    const P = { u: bu + 3 * g.u, v: bv + 3 * g.v };
+    T[order[0]] = { u: P.u, v: P.v, job: "press" };
+    const c = order.find((r, i) => i > 0 && kind[r] !== "st");
+    if (c) {
+      const g2 = unit(-P.u, -P.v);
+      const C = { u: Math.max(1.5, P.u + 6 * g2.u), v: P.v + 6 * g2.v };
+      T[c] = { u: lerp(T[c].u, C.u, 0.5), v: lerp(T[c].v, C.v, 0.5), job: "cover" };
+    }
+  }
+  return T;
+}
+
+/* ---------- attacking shape ---------- */
+function attack(B, carrier, offside, buildOut, form) {
+  const F = FORMS[form], ids = F.map(r => r.id), T = {};
+  const has = k => F.some(r => r.kind === k);
+  const three = has("cback"), wideBacks = !has("wing"), twoST = F.filter(r => r.kind === "st").length > 1;
+  const kind = {}; for (const r of F) kind[r.id] = r.kind;
+  const bu = B.u, bv = B.v, side = clamp(bv / HW, -1, 1);
+  T.GK = { u: lerp(3, 12, sstep(8, 45, bu)), v: clamp(0.2 * bv, -4, 4), job: bu > 30 ? "gk-sweep" : "gk-safe" };
+
+  const hb = clamp(bu - 11, 9, 31);
+  const wb = lerp(28, 20, sstep(12, 38, bu));
+  const sh = 0.3 * bv, split = bu < 16;
+  const ft = sstep(40, 48, bu);
+  const f2 = sstep(38, 46, bu) * sstep(6, 12, Math.abs(bv));
+  const stU = lerp(Math.min(offside - 0.8, L - 7), Math.min(offside - 0.6, L - 6), f2);
+
+  for (const r of F) {
+    const s = r.s, st = s * side;                       // st > 0: ball is on my side
+    const mine = Math.max(0, st), oth = Math.max(0, -st);
+    const up = sstep(0.05, 0.5, st), away = sstep(0.05, 0.5, -st);
+    switch (r.kind) {
+      case "back":
+        if (wideBacks) {
+          T[r.id] = { u: split ? hb + 1 : clamp(bu - 5 + 4 * up - 3 * away, 10, L - 16), v: s * lerp(15, HW - 3, sstep(12, 24, bu)),
+            job: split ? "back-split" : up > 0.5 ? "back-wide" : away > 0.5 ? "back-far" : "back-width" };
+        } else {
+          T[r.id] = { u: hb + 3 * mine - 2 * oth, v: clamp(sh + s * wb / 2, -HW + 2.5, HW - 2.5),
+            job: split ? "back-split" : st > 0.25 ? "back-support" : st < -0.25 ? "back-rest" : "back-mid" };
+        }
+        break;
+      case "cback": T[r.id] = { u: split ? 10 : Math.max(8, hb - 3), v: clamp(0.2 * bv, -5, 5), job: split ? "cb-show" : "cb-anchor" }; break;
+      case "wing": {
+        T[r.id] = { u: clamp(bu + 6 + 3 * up - 2 * away, 19, L - 7), v: s * (HW - 2), job: up > 0.5 ? "wing-ahead" : away > 0.5 ? "wing-far" : "wing-wide" };
+        const f = ft * away;
+        if (f > 0) { T[r.id].u = lerp(T[r.id].u, L - 6, f); T[r.id].v = lerp(T[r.id].v, 6 * s, f); if (f > 0.5) T[r.id].job = "wing-backpost"; }
+        break;
+      }
+      case "cmid": T[r.id] = { u: clamp(bu - 5, 14, L - 18), v: clamp(0.5 * bv, -9, 9), job: split ? "cm-show" : "cm-support" }; break;
+      case "dmid": T[r.id] = { u: clamp(bu - 8, 12, L - 24), v: clamp(0.35 * bv, -7, 7), job: split ? "cm-show" : "dm-behind" }; break;
+      case "imid": {
+        const t = clamp(s * bv / 8, -1, 1);
+        T[r.id] = { u: split ? 15 : clamp(bu + lerp(5, -4, (t + 1) / 2), 14, L - 12), v: clamp(0.4 * bv + s * 7, -13, 13),
+          job: split ? "cm-show" : t > 0.3 ? "cm-support" : t < -0.3 ? "imid-ahead" : "imid-level" };
+        break;
+      }
+      case "amid": T[r.id] = { u: clamp(bu + 7, 20, L - 12), v: clamp(0.5 * bv, -8, 8), job: "am-between" }; break;
+      case "st":
+        if (twoST) {
+          const near = s === sgn(bv);
+          T[r.id] = { u: stU, v: lerp(clamp(0.3 * bv, -5, 5) + s * 6, s * (near ? 4 : 5), f2), job: f2 > 0.5 ? (near ? "st-nearpost" : "st-backpost") : "st-pair" };
+        } else {
+          T[r.id] = { u: stU, v: lerp(clamp(0.3 * bv, -6, 6), sgn(bv) * 4, f2), job: f2 > 0.5 ? "st-nearpost" : "st-high" };
+        }
+        break;
+    }
+  }
+
+  // the player on the ball left their own spot: teammates fill in
+  if (!three && kind[carrier] === "back" && bu > T[carrier].u + 7) {
+    const cov = F.find(r => r.kind === "dmid") || F.find(r => r.kind === "cmid");
+    const o = F.find(r => r.kind === "back" && r.id !== carrier);
+    if (cov) T[cov.id] = { u: T[carrier].u, v: T[carrier].v * 0.55, job: "cm-cover" };
+    if (o) { T[o.id].v *= 0.6; T[o.id].job = "back-rest"; }
+  }
+  if (!twoST && kind[carrier] === "st" && has("wing") && bu < T[carrier].u - 9) {
+    const runU = Math.min(offside - 0.8, L - 7);
+    for (const r of F) if (r.kind === "wing") {
+      if (Math.abs(bv) < 3) T[r.id] = { u: runU, v: r.s * 11, job: "wing-run" };
+      else if (r.s !== sgn(bv)) T[r.id] = { u: runU, v: r.s * 6, job: "wing-run" };
+    }
+  }
+  T[carrier] = { u: bu - CARRY, v: bv, job: carrier === "GK" && buildOut ? "carrier-bo" : "carrier" };
+
+  for (const k of ids) {
+    if (k === carrier) continue;
+    const du = T[k].u - bu, dv = T[k].v - bv, dd = Math.hypot(du, dv);
+    if (dd < 6) { const e = dd < 0.01 ? { u: 1, v: 0 } : { u: du / dd, v: dv / dd }; T[k].u = bu + e.u * 6; T[k].v = bv + e.v * 6; }
+  }
+  for (const k of ids) if (k !== carrier) T[k].u = Math.min(T[k].u, offside - 0.5);
+  return T;
+}
+
+/* ---------- keep circles from stacking ---------- */
+function separate(pos, att, carrier, ball) {
+  const items = [];
+  for (const t of TEAMS) for (const r in pos[t]) items.push({ p: pos[t][r], fixed: t === att && r === carrier });
+  const MIN = 3.5, BALL_MIN = 2.7;
+  for (let it = 0; it < 6; it++) {
+    for (let i = 0; i < items.length; i++) {
+      const a = items[i];
+      if (!a.fixed) {
+        const dx = a.p.x - ball.x, dy = a.p.y - ball.y, dd = Math.hypot(dx, dy);
+        if (dd < BALL_MIN) { const ex = dd < 1e-3 ? 0 : dx / dd, ey = dd < 1e-3 ? 1 : dy / dd; a.p.x = ball.x + ex * BALL_MIN; a.p.y = ball.y + ey * BALL_MIN; }
+      }
+      for (let j = i + 1; j < items.length; j++) {
+        const b = items[j];
+        if (a.fixed && b.fixed) continue;
+        let dx = b.p.x - a.p.x, dy = b.p.y - a.p.y, dd = Math.hypot(dx, dy);
+        if (dd >= MIN) continue;
+        if (dd < 1e-3) { dx = j % 2 ? 1 : -1; dy = 0.3; dd = Math.hypot(dx, dy); }
+        const push = MIN - dd, ex = dx / dd, ey = dy / dd;
+        const wa = a.fixed ? 0 : b.fixed ? 1 : 0.5, wb = b.fixed ? 0 : a.fixed ? 1 : 0.5;
+        a.p.x -= ex * push * wa; a.p.y -= ey * push * wa;
+        b.p.x += ex * push * wb; b.p.y += ey * push * wb;
+      }
+    }
+    for (const it2 of items) { it2.p.x = clamp(it2.p.x, 0.8, W - 0.8); it2.p.y = clamp(it2.p.y, 0.6, L - 0.6); }
+  }
+}
+
+/* ---------- full picture for one ball position ---------- */
+function compute(st) {
+  const att = st.poss, def = other(att), fa = st.form[att], fd = st.form[def];
+  const Ba = toTeam(att, st.ball.x, st.ball.y), Bd = toTeam(def, st.ball.x, st.ball.y);
+  const buildOut = st.carrier === "GK" && Ba.u <= PA_D + 0.3 && Math.abs(Ba.v) <= PA_HW + 0.3;
+  const D = defend(Bd, buildOut, fd);
+  const deep = rolesOf(fd).map(r => L - D[r].u).sort((a, b) => b - a);
+  const offside = Math.max(L - BOL, deep[1], Ba.u);
+  const A = attack(Ba, st.carrier, offside, buildOut, fa);
+  const pos = { [att]: {}, [def]: {} };
+  for (const r of rolesOf(fa)) pos[att][r] = { ...toField(att, A[r].u, A[r].v), job: A[r].job };
+  for (const r of rolesOf(fd)) pos[def][r] = { ...toField(def, D[r].u, D[r].v), job: D[r].job };
+  separate(pos, att, st.carrier, st.ball);
+  for (const r of fieldIds(fa)) if (r !== st.carrier) {
+    const p = pos[att][r], q = toTeam(att, p.x, p.y);
+    if (q.u > offside - 0.3) Object.assign(p, toField(att, offside - 0.3, q.v));
+  }
+  if (buildOut) for (const r of fieldIds(fd)) {
+    const p = pos[def][r], q = toTeam(def, p.x, p.y);
+    if (q.u > L - BOL - 0.3) Object.assign(p, toField(def, L - BOL - 0.3, q.v));
+  }
+  for (const t of TEAMS) for (const r in pos[t]) { const p = pos[t][r]; p.x = clamp(p.x, 0.8, W - 0.8); p.y = clamp(p.y, 0.6, L - 0.6); }
+  return { att, def, buildOut, offside, Ba, pos };
+}
+
+/* ---------- view ---------- */
+const NS = "http://www.w3.org/2000/svg";
+const $ = id => document.getElementById(id);
+const svg = $("pitch"), ballEl = $("ball");
+const mk = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+const reduceMotion = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
+
+const els = { blue: {}, orange: {} }, hullEl = {}, unitEl = {}, ghostEl = {}, arrowEl = {};
+for (const t of TEAMS) {
+  hullEl[t] = mk("polygon", { class: `hull ${t}` }, $("hulls"));
+  unitEl[t] = { back: mk("polyline", { class: `unit ${t}` }, $("units")), mid: mk("polyline", { class: `unit ${t}` }, $("units")) };
+  ghostEl[t] = mk("circle", { class: `ghost ${t}`, r: 17.5, display: "none" }, $("ghosts"));
+  arrowEl[t] = mk("line", { class: `shift ${t}`, "marker-end": `url(#ah-${t})`, display: "none" }, $("ghosts"));
+}
+
+const start = () => ({ poss: "blue", carrier: central(state ? state.form.blue : "2-3-1"), ball: { x: 16, y: 32 } });
+let state = null;
+state = Object.assign(start(), { follow: "ALL", shape: true, form: { blue: "2-3-1", orange: "2-3-1" } });
+const roles = t => rolesOf(state.form[t]);
+let centerBase = {}, res = null;
+const disp = { blue: {}, orange: {} };
+const dispBall = { ...state.ball };
+
+function rebase() {
+  for (const p of TEAMS) centerBase[p] = compute({ poss: p, carrier: central(state.form[p]), ball: { x: HW, y: L / 2 }, form: state.form });
+}
+function buildPlayers() {
+  const host = $("players"); host.textContent = "";
+  for (const t of ["orange", "blue"]) {
+    els[t] = {}; disp[t] = {};
+    for (const r of roles(t)) {
+      const g = mk("g", { class: `pl ${t}` }, host);
+      mk("circle", { class: "halo", r: 26 }, g);
+      mk("circle", { class: "sh", cx: 1.4, cy: 2.4, r: 17.5 }, g);
+      mk("circle", { class: "body", r: 17.5 }, g);
+      mk("text", { class: "lbl", y: 4.8 }, g).textContent = r;
+      els[t][r] = g;
+      disp[t][r] = { x: res.pos[t][r].x, y: res.pos[t][r].y };
+    }
+  }
+}
+function buildChips() {
+  const have = new Set([...roles("blue"), ...roles("orange")]);
+  if (state.follow !== "ALL" && !have.has(state.follow)) state.follow = "ALL";
+  const list = ["ALL", ...ORDER.filter(r => have.has(r))];
+  $("chips").innerHTML = list.map(r => `<button type="button" class="chip" id="f-${r}" data-role="${r}" aria-pressed="false"${r === "ALL" ? "" : ` title="${NAMES[r]}"`}>${r === "ALL" ? "All" : r}</button>`).join("");
+}
+function buildCarrier() {
+  const sel = $("carrier"); sel.textContent = "";
+  for (const t of TEAMS) {
+    const og = document.createElement("optgroup"); og.label = TEAM[t];
+    for (const r of roles(t)) { const o = document.createElement("option"); o.value = `${t}:${r}`; o.textContent = `${TEAM[t]} ${r}`; og.appendChild(o); }
+    sel.appendChild(og);
+  }
+}
+
+let drag = null, raf = 0, lastT = 0;
+function schedule() { if (!raf) raf = requestAnimationFrame(frame); }
+function frame(ts) {
+  raf = 0;
+  const dt = lastT ? Math.min(0.05, (ts - lastT) / 1000) : 1 / 60;
+  lastT = ts;
+  const fast = drag && drag.moved, still = reduceMotion.matches;
+  let moving = false;
+  for (const t of TEAMS) for (const r of roles(t)) {
+    const tg = res.pos[t][r], d = disp[t][r];
+    const carrier = t === res.att && r === state.carrier;
+    const tau = still ? 0 : fast ? (carrier ? 0 : 0.11) : 0.2;
+    const k = tau ? 1 - Math.exp(-dt / tau) : 1;
+    d.x += (tg.x - d.x) * k; d.y += (tg.y - d.y) * k;
+    if (Math.abs(tg.x - d.x) > 0.01 || Math.abs(tg.y - d.y) > 0.01) moving = true; else { d.x = tg.x; d.y = tg.y; }
+  }
+  const tb = still || fast ? 0 : 0.12, kb = tb ? 1 - Math.exp(-dt / tb) : 1;
+  dispBall.x += (state.ball.x - dispBall.x) * kb; dispBall.y += (state.ball.y - dispBall.y) * kb;
+  if (Math.abs(state.ball.x - dispBall.x) > 0.01 || Math.abs(state.ball.y - dispBall.y) > 0.01) moving = true;
+  draw();
+  if (moving) schedule(); else lastT = 0;
+}
+
+const pt = p => `${(p.x * S).toFixed(1)},${(p.y * S).toFixed(1)}`;
+function convexHull(points) {
+  const p = points.slice().sort((a, b) => a.x - b.x || a.y - b.y);
+  const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+  const lo = [], up = [];
+  for (const q of p) { while (lo.length >= 2 && cross(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); }
+  for (let i = p.length - 1; i >= 0; i--) { const q = p[i]; while (up.length >= 2 && cross(up[up.length - 2], up[up.length - 1], q) <= 0) up.pop(); up.push(q); }
+  lo.pop(); up.pop();
+  return lo.concat(up);
+}
+const line = (t, kinds) => {
+  const ids = FORMS[state.form[t]].filter(r => kinds.includes(r.kind)).map(r => r.id);
+  return ids.length > 1 ? ids.map(r => pt(disp[t][r])).join(" ") : "";
+};
+
+function draw() {
+  for (const t of TEAMS) for (const r of roles(t)) {
+    const d = disp[t][r];
+    els[t][r].setAttribute("transform", `translate(${(d.x * S).toFixed(2)} ${(d.y * S).toFixed(2)})`);
+  }
+  ballEl.setAttribute("transform", `translate(${(dispBall.x * S).toFixed(2)} ${(dispBall.y * S).toFixed(2)})`);
+  if (state.shape) {
+    for (const t of TEAMS) {
+      // attacking team: area of all field players. Defending team: everyone behind the striker(s), with its lines drawn.
+      const attacking = t === res.att, f = state.form[t];
+      hullEl[t].setAttribute("points", convexHull((attacking ? fieldIds(f) : blockIds(f)).map(r => disp[t][r])).map(pt).join(" "));
+      unitEl[t].back.setAttribute("points", attacking ? "" : line(t, ["back", "cback"]));
+      unitEl[t].mid.setAttribute("points", attacking ? "" : line(t, ["wing", "cmid", "imid"]));
+    }
+  }
+  const f = state.follow;
+  for (const t of TEAMS) {
+    const g = f === "ALL" ? null : centerBase[state.poss].pos[t][f], d = disp[t][f];
+    if (!g || !d) { ghostEl[t].setAttribute("display", "none"); arrowEl[t].setAttribute("display", "none"); continue; }
+    ghostEl[t].setAttribute("display", "inline");
+    ghostEl[t].setAttribute("cx", (g.x * S).toFixed(1));
+    ghostEl[t].setAttribute("cy", (g.y * S).toFixed(1));
+    const dx = d.x - g.x, dy = d.y - g.y, len = Math.hypot(dx, dy);
+    if (len < 4.6) { arrowEl[t].setAttribute("display", "none"); continue; }
+    const ex = dx / len, ey = dy / len;
+    arrowEl[t].setAttribute("display", "inline");
+    arrowEl[t].setAttribute("x1", ((g.x + ex * 1.9) * S).toFixed(1));
+    arrowEl[t].setAttribute("y1", ((g.y + ey * 1.9) * S).toFixed(1));
+    arrowEl[t].setAttribute("x2", ((d.x - ex * 2.6) * S).toFixed(1));
+    arrowEl[t].setAttribute("y2", ((d.y - ey * 2.6) * S).toFixed(1));
+  }
+}
+
+/* ---------- panel ---------- */
+const BALL_ICON = '<svg width="16" height="16" viewBox="-9 -9 18 18" aria-hidden="true"><circle r="8" class="ball-body"/><path class="ball-patch" d="M0 -3.7L3.52 -1.14L2.17 2.99L-2.17 2.99L-3.52 -1.14Z"/></svg>';
+function statusText() {
+  const a = TEAM[res.att], d = TEAM[res.def];
+  if (res.buildOut) return `${a} keeper has the ball in the box. ${d} has to stay behind the build-out line until it's played.`;
+  const { u, v } = res.Ba;
+  const third = u < 20 ? `${a}'s defensive third` : u < 40 ? "middle third" : "final third";
+  const lane = v < -7 ? "left side" : v > 7 ? "right side" : "center";
+  return `${a} ${NAMES[state.carrier].toLowerCase()} has the ball · ${third}, ${lane}`;
+}
+function teamSize(P, members) {
+  const xs = members.map(r => P[r].x), ys = members.map(r => P[r].y);
+  return { w: Math.round(Math.max(...xs) - Math.min(...xs)), d: Math.round(Math.max(...ys) - Math.min(...ys)) };
+}
+function renderPanel() {
+  for (const t of TEAMS) $(`poss-${t}`).setAttribute("aria-pressed", String(state.poss === t));
+  $("status").innerHTML = BALL_ICON + `<span>${statusText()}</span>`;
+  const f = state.follow, rows = [];
+  let anyGhost = false;
+  for (const t of TEAMS) {
+    const attacking = t === res.att, mode = attacking ? "Attacking" : "Defending", form = state.form[t];
+    if (f === "ALL") {
+      const s = teamSize(res.pos[t], attacking ? fieldIds(form) : blockIds(form));
+      rows.push(`<div class="row"><span class="tag ${t}">${TEAM[t]}</span><span class="mode ${t}">${mode} · ${form}</span><p>${attacking ? ATT_TEAM : DEF_TEAM}<span class="size">${attacking ? "Field players spread" : "Defenders and mids squeezed"}: ${s.w} yd wide, ${s.d} yd deep</span></p></div>`);
+    } else if (!res.pos[t][f]) {
+      rows.push(`<div class="row"><span class="tag ${t}">${TEAM[t]}</span><span class="mode ${t}">${mode} · ${form}</span><p>${TEAM[t]}'s ${form} has no ${NAMES[f].toLowerCase()}.</p></div>`);
+    } else {
+      anyGhost = true;
+      const job = res.pos[t][f].job, tip = (attacking ? ATT_TIPS : DEF_TIPS)[job] || "";
+      rows.push(`<div class="row"><span class="tag ${t}">${TEAM[t]} ${f}</span><span class="mode ${t}">${NAMES[f]} · ${mode}</span><p>${tip}</p></div>`);
+    }
+  }
+  $("rows").innerHTML = rows.join("");
+  $("legend").hidden = !anyGhost;
+  $("carrier").value = `${state.poss}:${state.carrier}`;
+}
+function applyFollow() {
+  svg.classList.toggle("following", state.follow !== "ALL");
+  document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.role === state.follow)));
+  for (const t of ["orange", "blue"]) for (const r of roles(t)) {
+    const on = state.follow === r;
+    els[t][r].classList.toggle("on", on);
+    if (on) $("players").appendChild(els[t][r]);
+  }
+}
+function update() { res = compute(state); renderPanel(); schedule(); }
+function announce() { $("live").textContent = statusText(); }
+
+/* ---------- actions ---------- */
+function giveBall(t, r) {
+  state.poss = t; state.carrier = r;
+  if (r === "GK") state.ball = clampBall(toField(t, 4.5, 0));
+  else { const d = disp[t][r]; state.ball = clampBall({ x: d.x, y: d.y + (t === "blue" ? -CARRY : CARRY) }); }
+  update();
+}
+function nearest(t, P) {
+  let best = null, bd = Infinity;
+  for (const r of roles(t)) { const d = P[r], dd = (d.x - state.ball.x) ** 2 + (d.y - state.ball.y) ** 2; if (dd < bd) { bd = dd; best = r; } }
+  return best;
+}
+function setPoss(t) {
+  if (t === state.poss) return;
+  state.carrier = nearest(t, disp[t]); state.poss = t;
+  update(); announce();
+}
+function setForm(t, f) {
+  state.form[t] = f;
+  if (state.poss === t && !roles(t).includes(state.carrier)) {
+    state.carrier = central(f);
+    state.carrier = nearest(t, compute(state).pos[t]);
+  }
+  rebase(); res = compute(state);
+  buildPlayers(); buildChips(); buildCarrier(); applyFollow(); renderPanel(); draw();
+  $("live").textContent = `${TEAM[t]} now in a ${f}.`;
+}
+
+function svgPoint(e) {
+  const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+  const q = p.matrixTransform(svg.getScreenCTM().inverse());
+  return { x: q.x / S, y: q.y / S };
+}
+svg.addEventListener("pointerdown", e => {
+  if (e.pointerType === "mouse" && e.button !== 0) return;
+  svg.classList.remove("idle");
+  const p = svgPoint(e);
+  let hit = null, best = 2.9;
+  for (const t of TEAMS) for (const r of roles(t)) { const d = disp[t][r], dd = Math.hypot(d.x - p.x, d.y - p.y); if (dd < best) { best = dd; hit = { t, r }; } }
+  const bd = Math.hypot(dispBall.x - p.x, dispBall.y - p.y);
+  const onBall = bd < 2.2 && (!hit || bd <= best + 0.6);
+  if (!onBall && hit) { if (!(hit.t === state.poss && hit.r === state.carrier)) giveBall(hit.t, hit.r); }
+  else if (!onBall) { state.ball = clampBall(p); update(); }
+  drag = { id: e.pointerId, sx: p.x, sy: p.y, ox: state.ball.x - p.x, oy: state.ball.y - p.y, moved: false };
+  try { svg.setPointerCapture(e.pointerId); } catch (_) {}
+  svg.classList.add("grabbing");
+  e.preventDefault();
+});
+svg.addEventListener("pointermove", e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  const p = svgPoint(e);
+  if (!drag.moved && Math.hypot(p.x - drag.sx, p.y - drag.sy) < 0.4) return;
+  drag.moved = true;
+  state.ball = clampBall({ x: p.x + drag.ox, y: p.y + drag.oy });
+  update();
+});
+const endDrag = e => {
+  if (!drag || (e && e.pointerId !== drag.id)) return;
+  drag = null; svg.classList.remove("grabbing"); announce(); schedule();
+};
+svg.addEventListener("pointerup", endDrag);
+svg.addEventListener("pointercancel", endDrag);
+svg.addEventListener("lostpointercapture", endDrag);
+svg.addEventListener("keydown", e => {
+  const step = e.shiftKey ? 4 : 1;
+  const mv = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+  if (!mv) return;
+  e.preventDefault(); svg.classList.remove("idle");
+  state.ball = clampBall({ x: state.ball.x + mv[0], y: state.ball.y + mv[1] });
+  update(); announce();
+});
+
+for (const t of TEAMS) {
+  $(`poss-${t}`).addEventListener("click", () => setPoss(t));
+  const fs = $(`form-${t}`);
+  fs.innerHTML = FORM_LIST.map(f => `<option value="${f}">${f}</option>`).join("");
+  fs.value = state.form[t];
+  fs.addEventListener("change", () => setForm(t, fs.value));
+}
+$("chips").addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if (!c) return;
+  state.follow = c.dataset.role; applyFollow(); renderPanel(); draw();
+});
+$("shape").addEventListener("change", e => { state.shape = e.target.checked; svg.classList.toggle("noshape", !state.shape); draw(); });
+$("carrier").addEventListener("change", () => { const [t, r] = $("carrier").value.split(":"); giveBall(t, r); announce(); });
+$("reset").addEventListener("click", () => { Object.assign(state, start()); update(); announce(); });
+
+window.ShapeBoard = { compute, FORMS, FORM_LIST, state: () => JSON.parse(JSON.stringify(state)) };
+rebase(); res = compute(state);
+buildPlayers(); buildChips(); buildCarrier(); applyFollow(); renderPanel(); draw();
+})();
+</script>
+
+</body>
+</html>
