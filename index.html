@@ -28,13 +28,13 @@ body{margin:0}
   --rule:#c5cfc7;
   --focus:#1b51bd;
   /* teams: practice pinnies */
-  --team-blue:#2462dc;
+  --team-blue:#7a3ee0;
   --team-orange:#ff7b22;
   --on-blue:#ffffff;
   --on-orange:#2b1405;
-  --blue-ink:#1b51bd;
+  --blue-ink:#6529c4;
   --orange-ink:#a83f08;
-  --tint-blue:#b9cfff;
+  --tint-blue:#dcc6ff;
   --tint-orange:#ffcaa3;
   /* pitch */
   --grass-a:#2f7c3d;
@@ -45,6 +45,8 @@ body{margin:0}
   --shadow:#0b2412;
   --ball:#fbfbf6;
   --ball-ink:#1c211e;
+  --lane-no:#ffb9ab;
+  --trail:#d9ffa8;
   /* type */
   --font-display:"Big Shoulders Display","Arial Narrow","Roboto Condensed",sans-serif;
   --font-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
@@ -52,14 +54,14 @@ body{margin:0}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#0c130f;--surface:#151f19;--ink:#e3ece5;--ink-soft:#9aab9f;--rule:#2a3830;--focus:#86a9ff;
-    --blue-ink:#8eb0ff;--orange-ink:#ffa066;
+    --blue-ink:#c3a4ff;--orange-ink:#ffa066;
     --grass-a:#2a6f37;--grass-b:#266633;--grass-edge:#1b4d25;--pitch-line:#e8f0e6;--chalk:#ecd645;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0c130f;--surface:#151f19;--ink:#e3ece5;--ink-soft:#9aab9f;--rule:#2a3830;--focus:#86a9ff;
-  --blue-ink:#8eb0ff;--orange-ink:#ffa066;
+  --blue-ink:#c3a4ff;--orange-ink:#ffa066;
   --grass-a:#2a6f37;--grass-b:#266633;--grass-edge:#1b4d25;--pitch-line:#e8f0e6;--chalk:#ecd645;
   color-scheme:dark;
 }
@@ -91,6 +93,17 @@ button{touch-action:manipulation}
   .poss button{flex:1;justify-content:center}
 }
 
+.modes{display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap}
+.speeds{display:flex;gap:6px 10px;flex-wrap:wrap;align-items:center;flex:1 1 100%;padding:6px 10px;border-radius:10px;background:var(--surface);border:1px solid var(--rule)}
+.gear{appearance:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);background:var(--surface);color:var(--ink);font-weight:700;font-size:.86rem;padding:7px 11px;min-height:38px;border-radius:999px;cursor:pointer}
+@media (max-width:560px){.gear{padding:7px 10px}.gear span{display:none}}
+.gear[aria-expanded="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.speeds .pick,.speeds .switch{font-size:.84rem;gap:5px}
+.speeds .pick select{font-size:.84rem;padding:6px 3px;min-height:36px}
+.seg{display:inline-flex;flex:1 1 0;min-width:200px;gap:2px;padding:3px;border-radius:999px;background:var(--surface);border:1px solid var(--rule)}
+.seg button{flex:1;appearance:none;border:0;background:transparent;color:var(--ink-soft);font-family:var(--font-display);font-weight:800;font-size:.98rem;line-height:1;letter-spacing:.06em;text-transform:uppercase;padding:8px 8px;min-height:36px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+@media (min-width:860px){.seg{flex:0 0 auto}}
 .forms{display:flex;gap:8px 14px;flex-wrap:wrap}
 .form{display:inline-flex;align-items:center;gap:7px;font-size:.9rem;font-weight:700;flex:1 1 0;min-width:0}
 .form .sw{width:10px;height:10px;border-radius:50%;flex:none}
@@ -101,8 +114,8 @@ button{touch-action:manipulation}
 /* field */
 .layout{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:start}
 .board-col{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
-.board{width:min(100%,max(270px,calc((100vh - 240px) * .6818)));max-width:100%;aspect-ratio:45/66}
-@supports (height:100svh){.board{width:min(100%,max(270px,calc((100svh - 240px) * .6818)))}}
+.board{width:min(100%,max(270px,calc((100vh - 290px) * .6818)));max-width:100%;aspect-ratio:45/66}
+@supports (height:100svh){.board{width:min(100%,max(270px,calc((100svh - 290px) * .6818)))}}
 #pitch{display:block;width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;border-radius:12px;outline:none}
 #pitch.grabbing{cursor:grabbing}
 #pitch:focus-visible{box-shadow:0 0 0 3px var(--bg),0 0 0 6px var(--focus)}
@@ -150,6 +163,19 @@ button{touch-action:manipulation}
 .pl.on .halo{opacity:1}
 #pitch.following .pl:not(.on){opacity:.45}
 
+.lane{fill:none;stroke-width:2.4;stroke-linecap:round;pointer-events:none}
+.lane.open{stroke:var(--pitch-line);opacity:.9}
+.lane.creative{stroke:var(--chalk);stroke-width:2.6;opacity:.97}
+.lane.creative.loft{stroke-dasharray:10 6}
+.lane-run{stroke:var(--chalk);stroke-width:2.2;stroke-dasharray:1 5;stroke-linecap:round;fill:none;pointer-events:none}
+.lane-target{fill:var(--chalk);fill-opacity:.16;stroke:var(--chalk);stroke-width:2.4;stroke-dasharray:4 3;pointer-events:none}
+.ah-chalk{fill:var(--chalk)}
+.lane-tag{font-family:var(--font-display);font-weight:800;font-size:9px;letter-spacing:.9px;text-anchor:middle;fill:var(--chalk);stroke:var(--grass-edge);stroke-width:3.2px;paint-order:stroke;stroke-linejoin:round;pointer-events:none}
+.lane.long{stroke-width:1.3;opacity:.7}
+.lane.blocked{stroke:var(--lane-no);stroke-dasharray:2 7;opacity:.95}
+#pitch.following #lanes{opacity:.45}
+.pl .act{font-family:var(--font-body);font-weight:700;font-size:9.5px;text-anchor:middle;fill:var(--pitch-line);stroke:var(--grass-edge);stroke-width:3.2px;paint-order:stroke;stroke-linejoin:round;pointer-events:none}
+#pitch.noact .act{display:none}
 .ball-body{fill:var(--ball);stroke:var(--ball-ink);stroke-width:1.1}
 .ball-patch{fill:var(--ball-ink)}
 .ball-seam{stroke:var(--ball-ink);stroke-width:.9;fill:none}
@@ -160,6 +186,8 @@ button{touch-action:manipulation}
 
 /* panel */
 .panel{display:flex;flex-direction:column;gap:12px;min-width:0;width:100%}
+.toggles{display:flex;flex-wrap:wrap;gap:0 16px}
+.toggles .switch{min-height:34px}
 .follow{display:flex;flex-direction:column;gap:6px}
 .follow-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .follow-head .switch{min-height:30px;font-size:.86rem;color:var(--ink-soft)}
@@ -167,6 +195,12 @@ button{touch-action:manipulation}
 .chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(40px,1fr));gap:4px}
 .chip{appearance:none;border:1.5px solid var(--rule);background:var(--surface);color:var(--ink);font-family:var(--font-display);font-weight:800;font-size:1.05rem;letter-spacing:.04em;line-height:1;padding:9px 0;min-height:40px;border-radius:8px;cursor:pointer;min-width:0}
 .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.track{display:flex;flex-direction:column;gap:8px}
+.track-btn{align-self:flex-start;font-weight:700}
+.track-btn[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.track-pick{display:flex;flex-direction:column;gap:6px}
+#trail{pointer-events:none;opacity:.95}
+.pl.trk .body{stroke:var(--trail);stroke-width:4}
 
 .card{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:12px 14px 13px;display:flex;flex-direction:column;gap:12px}
 .status{margin:0;font-size:.84rem;line-height:1.35;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start}
@@ -200,8 +234,8 @@ button{touch-action:manipulation}
 @media (min-width:860px){
   .app{padding-block:20px 32px;width:fit-content;max-width:100%}
   .layout{grid-template-columns:auto minmax(320px,380px);justify-content:center;gap:28px}
-  .board{width:clamp(300px,calc((100vh - 190px) * .6818),calc(100vw - 480px))}
-  @supports (height:100svh){.board{width:clamp(300px,calc((100svh - 190px) * .6818),calc(100vw - 480px))}}
+  .board{width:clamp(300px,calc((100vh - 240px) * .6818),calc(100vw - 480px))}
+  @supports (height:100svh){.board{width:clamp(300px,calc((100svh - 240px) * .6818),calc(100vw - 480px))}}
   .panel{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
 }
 @media (prefers-reduced-motion: reduce){
@@ -218,13 +252,32 @@ button{touch-action:manipulation}
       <h1>2-3-1 Shape Board</h1>
       <p>7v7 · pick each team's formation</p>
     </div>
-    <div class="poss" role="group" aria-label="Who has the ball">
-      <button type="button" id="poss-blue" data-team="blue" aria-pressed="true"><span class="sw" aria-hidden="true"></span>Blue ball</button>
+    <div class="poss" id="poss" role="group" aria-label="Who has the ball">
+      <button type="button" id="poss-blue" data-team="blue" aria-pressed="true"><span class="sw" aria-hidden="true"></span>Purple ball</button>
       <button type="button" id="poss-orange" data-team="orange" aria-pressed="false"><span class="sw" aria-hidden="true"></span>Orange ball</button>
     </div>
+    <div class="poss" id="side" role="group" aria-label="Purple starts on" hidden>
+      <button type="button" id="side-offense" data-team="blue" aria-pressed="true"><span class="sw" aria-hidden="true"></span>Offense</button>
+      <button type="button" id="side-defense" data-team="orange" aria-pressed="false"><span class="sw" aria-hidden="true"></span>Defense</button>
+    </div>
   </header>
+  <div class="modes">
+    <div class="seg" role="group" aria-label="Mode">
+      <button type="button" id="mode-free" aria-pressed="true">Free board</button>
+      <button type="button" id="mode-game" aria-pressed="false">Game speed</button>
+    </div>
+    <button type="button" class="gear" id="speed-wrap" aria-label="Settings" title="Settings" aria-expanded="false" aria-controls="speed-panel" hidden>
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zM19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3 1a7.6 7.6 0 0 0-2.6-1.5L14.1 2.5h-4l-.4 2.6a7.6 7.6 0 0 0-2.6 1.5l-2.3-1-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.3-1a7.6 7.6 0 0 0 2.6 1.5l.4 2.6h4l.4-2.6a7.6 7.6 0 0 0 2.6-1.5l2.3 1 2-3.4z"/></svg>
+      <span>Settings</span>
+    </button>
+    <div class="speeds" id="speed-panel" role="group" aria-label="Game speed settings" hidden>
+      <label class="pick" for="speed">Players <select id="speed"><option value="1">100%</option><option value="0.75">75%</option><option value="0.5">50%</option><option value="0.25" selected>25%</option></select></label>
+      <label class="pick" for="ball-speed">Ball <select id="ball-speed"><option value="1">100%</option><option value="0.75">75%</option><option value="0.5" selected>50%</option><option value="0.25">25%</option></select></label>
+      <label class="switch" for="bonus"><input type="checkbox" id="bonus" checked> Offense +25%</label>
+    </div>
+  </div>
   <div class="forms" role="group" aria-label="Formations">
-    <label class="form" for="form-blue"><span class="sw blue" aria-hidden="true"></span>Blue <select id="form-blue"></select></label>
+    <label class="form" for="form-blue"><span class="sw blue" aria-hidden="true"></span>Purple <select id="form-blue"></select></label>
     <label class="form" for="form-orange"><span class="sw orange" aria-hidden="true"></span>Orange <select id="form-orange"></select></label>
   </div>
 
@@ -236,6 +289,7 @@ button{touch-action:manipulation}
             <pattern id="net" width="6" height="6" patternUnits="userSpaceOnUse"><path class="net-mesh" d="M0 0L6 6M6 0L0 6"/></pattern>
             <marker id="ah-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="3.6" markerHeight="3.6" orient="auto"><path class="ah-blue" d="M0 0L10 5L0 10z"/></marker>
             <marker id="ah-orange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="3.6" markerHeight="3.6" orient="auto"><path class="ah-orange" d="M0 0L10 5L0 10z"/></marker>
+            <marker id="ah-chalk" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="3.6" markerHeight="3.6" orient="auto"><path class="ah-chalk" d="M0 0L10 5L0 10z"/></marker>
           </defs>
           <rect class="g-edge" x="-25" y="-30" width="450" height="660"/>
           <rect class="g-a" x="0" y="0" width="400" height="600"/>
@@ -245,6 +299,7 @@ button{touch-action:manipulation}
           <rect class="g-b" x="0" y="350" width="400" height="50"/>
           <rect class="g-b" x="0" y="450" width="400" height="50"/>
           <rect class="g-b" x="0" y="550" width="400" height="50"/>
+          <image id="trail" x="-25" y="-30" width="450" height="660" preserveAspectRatio="none" display="none"/>
           <g class="ln">
             <rect x="0" y="0" width="400" height="600"/>
             <line x1="0" y1="300" x2="400" y2="300"/>
@@ -261,9 +316,10 @@ button{touch-action:manipulation}
           <text class="bol-txt" transform="translate(411 210) rotate(90)">BUILD-OUT</text>
           <text class="bol-txt" transform="translate(411 390) rotate(90)">BUILD-OUT</text>
           <text class="goal-txt" x="160" y="-9" text-anchor="end">ORANGE GOAL</text>
-          <text class="goal-txt" x="160" y="619" text-anchor="end">BLUE GOAL</text>
+          <text class="goal-txt" x="160" y="619" text-anchor="end">PURPLE GOAL</text>
           <g id="hulls"></g>
           <g id="units"></g>
+          <g id="lanes"></g>
           <g id="ghosts"></g>
           <g id="players"></g>
           <g id="ball" pointer-events="none">
@@ -275,14 +331,31 @@ button{touch-action:manipulation}
           </g>
         </svg>
       </div>
-      <p class="hint">Drag the ball to move it. Tap any player to give them the ball. Tap a keeper for a goal kick.</p>
+      <p class="hint" id="hint">Drag the ball to move it. Tap any player to give them the ball. Tap a keeper for a goal kick.</p>
     </section>
 
     <section class="panel" aria-label="Coaching">
+      <div class="track">
+        <button type="button" class="btn track-btn" id="track-btn" aria-pressed="false">Start tracking session</button>
+        <div class="track-pick" id="track-pick" hidden>
+          <div class="label" id="track-label">Track a Purple position</div>
+          <div class="chips" id="track-chips" role="group" aria-labelledby="track-label"></div>
+          <p class="note" id="track-note"></p>
+        </div>
+      </div>
+      <div class="seg" role="group" aria-label="Pass types">
+        <button type="button" id="pass-basic" aria-pressed="true">Basic passes</button>
+        <button type="button" id="pass-creative" aria-pressed="false">Creative passes</button>
+      </div>
+      <div class="toggles" role="group" aria-label="Show on the field">
+        <label class="switch" for="pressure"><input type="checkbox" id="pressure" checked> Pressure on the ball</label>
+        <label class="switch" for="lanes-on"><input type="checkbox" id="lanes-on" checked> Pass lines</label>
+        <label class="switch" for="acts-on"><input type="checkbox" id="acts-on" checked> Actions</label>
+        <label class="switch" for="shape"><input type="checkbox" id="shape" checked> Team shape</label>
+      </div>
       <div class="follow">
         <div class="follow-head">
           <div class="label" id="follow-label">Follow a position</div>
-          <label class="switch" for="shape"><input type="checkbox" id="shape" checked> Team shape</label>
         </div>
         <div class="chips" id="chips" role="group" aria-labelledby="follow-label"></div>
       </div>
@@ -305,7 +378,7 @@ button{touch-action:manipulation}
         <label class="pick" for="carrier">Ball with <select id="carrier"></select></label>
         <button type="button" class="btn" id="reset">Reset</button>
       </div>
-      <p class="note">Field drawn 60 × 40 yd. Build-out lines sit halfway between the penalty box and midfield, and in 7v7 nobody can be offside between halfway and the build-out line.</p>
+      <p class="note">Creative passes add yellow curves: a curl round a defender, a ball over the top (broken curve), or a ball into space for a runner (the ring is where it lands, the dots are the run; tap the ring to play it there). Pass lines: a solid line means the pass is on. A thin line means it is on but long (over 22 yards). A dotted line means a defender is close enough to cut it out. Field drawn 60 × 40 yd. Build-out lines sit halfway between the penalty box and midfield, and in 7v7 nobody can be offside between halfway and the build-out line.</p>
     </section>
   </main>
   <div class="sr" aria-live="polite" id="live"></div>
@@ -324,7 +397,7 @@ const CARRY = 2.1;
 const S = 10;
 
 const TEAMS = ["blue", "orange"];
-const TEAM = { blue: "Blue", orange: "Orange" };
+const TEAM = { blue: "Purple", orange: "Orange" };   // the "blue" key is the user's own team, shown in purple
 const NAMES = { GK: "Goalkeeper", LB: "Left back", CB: "Center back", RB: "Right back", DM: "Holding mid", LM: "Left mid", CM: "Center mid", RM: "Right mid", AM: "Attacking mid", LS: "Left striker", ST: "Striker", RS: "Right striker" };
 const ORDER = ["GK", "LB", "CB", "RB", "DM", "LM", "CM", "RM", "AM", "LS", "ST", "RS"];
 
@@ -345,6 +418,7 @@ const central = f => { const F = FORMS[f]; return (F.find(r => r.kind === "cmid"
 
 const ATT_TEAM = "Make the field big. Someone wide on each side, someone high, and always someone open near the ball.";
 const DEF_TEAM = "Make the field small. Squeeze toward the ball, stay goal-side, and the closest player presses.";
+const DEF_TEAM_HOLD = "Make the field small. Squeeze toward the ball and stay goal-side. Nobody is pressing the ball right now.";
 
 const ATT_TIPS = {
   "carrier": "You have the ball. Get your head up, then pass, dribble, or shoot.",
@@ -360,7 +434,7 @@ const ATT_TIPS = {
   "back-width": "Stay wide near the sideline. With three at the back, the outside backs make the field big.",
   "cb-show": "Stand near the top of the box in the middle. You're the keeper's short pass if the wide players are covered.",
   "cb-anchor": "Stay in the middle behind the ball. You're the safe pass back, and the first defender if we lose it.",
-  "cm-show": "Show for the ball in the middle, just outside the box. Check your shoulder so you can turn.",
+  "cm-show": "A defender or the keeper has the ball. Show for it in the middle, a few yards ahead of the ball. Check your shoulder so you can turn.",
   "cm-support": "Stay a few steps from the ball at an angle, so there's always an open pass. Don't hide behind a defender.",
   "cm-cover": "A defender went forward with the ball. Drop back and fill their spot until they get back.",
   "dm-behind": "Stay behind the ball in the middle. You're the safe pass back, and you stop the counter if we lose it.",
@@ -371,11 +445,22 @@ const ATT_TIPS = {
   "wing-ahead": "Stay wide and get ahead of the ball. Give a pass option down the line.",
   "wing-far": "Stay wide on the far side. That space is wide open if we switch the ball.",
   "wing-backpost": "The ball is on the other wing near their goal. Crash the back post for the cross.",
-  "wing-run": "Our striker came back to get the ball. Run into the space they left.",
+  "wing-box": "Our striker has the ball near their goal. Get into the box at your post, ready for a pass or a rebound.",
+  "wing-run": "Our striker came short for the ball. Get high and wide, level with their last defender, to give a pass in behind.",
   "st-high": "Stay high, on the last defender's shoulder, to push their defense back. In 7v7 you can't be offside until you're past their build-out line.",
   "st-pair": "Stay high and split apart from your strike partner, so their defenders can't guard you both. In 7v7 you can't be offside until you're past their build-out line.",
   "st-nearpost": "The ball is out wide near their goal. Attack the near post for the cross.",
-  "st-backpost": "The ball is out wide on the other side. Attack the back post for the cross."
+  "st-backpost": "The ball is out wide on the other side. Attack the back post for the cross.",
+  "wing-show": "Your teammate is under pressure and a defender is blocking the pass up the line. Come back level with the ball, stay wide, and open your body to face up the field.",
+  "wing-open": "A defender is blocking the pass to you. Slide along the sideline until you can see the ball with nobody in between.",
+  "mid-show": "Your teammate is under pressure. Move to where they can see you with no defender in between, close enough for an easy pass.",
+  "find-lane": "A defender is between you and the ball. Move until you can see the ball with nobody in between.",
+  "st-slide": "A defender is blocking the pass to you. Slide along their back line until there is a clear pass.",
+  "run-behind": "The pass to your feet is blocked, but there is space behind their defender. Start level with their last defender, then sprint into the space for a ball down the line.",
+  "st-run": "There is a gap in their back line. Stay level with their last defender, then sprint into the space behind them for a through ball.",
+  "st-channel": "Your teammate is stuck out wide. Run into the channel on their side, behind the defender, for a ball into space.",
+  "st-pocket": "Drop into the space between their midfield and their defenders, where you have room to turn. Stay in the middle of the field.",
+  "st-check": "Your teammate is under pressure and can't reach you up high. Come short toward the ball, then lay it off or turn."
 };
 const DEF_TIPS = {
   "press": "You're the closest, so you press. Get between the ball and our goal, slow them down, and stay on your feet.",
@@ -396,7 +481,22 @@ const DEF_TIPS = {
   "st-lead": "Lead the press. Curve your run so they can only pass one way.",
   "st-counter": "Stay near halfway. Block the pass back to their defenders and be ready to break when we win it.",
   "bo-wait": "Their keeper has the ball. Stay behind the build-out line until it's played, then press.",
-  "st-bol": "Wait right on the build-out line. As soon as the keeper passes, sprint to press."
+  "st-bol": "Wait right on the build-out line. As soon as the keeper passes, sprint to press.",
+  "back-post": "The ball is wide and near our goal. Get to the back post and pick up their runner.",
+  "contain": "Nobody is pressing right now. Stay between the ball and our goal, and be ready to step up."
+};
+// one or two words shown under each player (ACT_DEF wins for the defending team where a job name is shared)
+const ACT_DEF = { "back-mid": "Goal-side" };
+const ACT = {
+  "gk-safe": "Safe pass", "gk-sweep": "Sweep", "gk-angle": "Set", "back-split": "Split wide", "back-support": "Support", "back-rest": "Stay back",
+  "back-mid": "Support", "back-wide": "Get wide", "back-far": "Stay wide", "back-width": "Stay wide", "cb-show": "Show", "cb-anchor": "Stay back",
+  "cm-show": "Show", "cm-support": "Support", "cm-cover": "Cover", "dm-behind": "Support", "imid-ahead": "Get ahead", "imid-level": "Support",
+  "am-between": "Find space", "wing-wide": "Stay wide", "wing-ahead": "Get ahead", "wing-far": "Stay wide", "wing-backpost": "Back post", "wing-run": "Run",
+  "st-high": "Stay high", "st-pair": "Stay high", "st-nearpost": "Near post", "st-backpost": "Back post",
+  "wing-show": "Show", "wing-open": "Get open", "mid-show": "Show", "find-lane": "Get open", "st-slide": "Get open", "st-check": "Come short", "st-pocket": "Find space", "run-behind": "Run behind", "st-run": "Run behind", "st-channel": "Channel run", "back-post": "Back post", "wing-box": "Attack box",
+  "press": "Press", "cover": "Cover", "hold-bol": "Hold line", "back-ball": "Shift over", "back-tuck": "Tuck in", "cb-center": "Cover",
+  "screen": "Screen", "screen2": "Screen", "am-def": "Drop", "wing-squeeze": "Squeeze", "wing-tuck": "Tuck in", "wing-narrow": "Stay narrow",
+  "st-lead": "Press", "st-counter": "Stay up", "bo-wait": "Wait", "st-bol": "Wait", "contain": "Hold"
 };
 
 /* ---------- helpers ---------- */
@@ -413,7 +513,7 @@ const toTeam = (t, x, y) => (t === "blue" ? { u: L - y, v: x - HW } : { u: y, v:
 const clampBall = p => ({ x: clamp(p.x, 0.6, W - 0.6), y: clamp(p.y, 0.6, L - 0.6) });
 
 /* ---------- defending shape ---------- */
-function defend(B, buildOut, form) {
+function defend(B, buildOut, form, pressure) {
   const F = FORMS[form], bu = B.u, bv = B.v, T = {};
   const has = k => F.some(r => r.kind === k);
   const three = has("cback"), hasDM = has("dmid");
@@ -442,6 +542,14 @@ function defend(B, buildOut, form) {
     }
   }
 
+  // ball wide and near our goal: the far-side back drops to the back post to pick up the runner
+  const bp = sstep(22, 14, bu) * sstep(8, 13, Math.abs(bv));
+  if (bp > 0) for (const r of F) if (r.kind === "back" && r.s === -sgn(bv)) {
+    const p = T[r.id];
+    p.u = lerp(p.u, Math.max(3, uDL - 0.5), bp); p.v = lerp(p.v, r.s * 5, bp);
+    if (bp > 0.5) p.job = "back-post";
+  }
+
   if (buildOut) {
     const lim = L - BOL - 0.8;
     for (const r of F) {
@@ -451,6 +559,10 @@ function defend(B, buildOut, form) {
       else { p.u = Math.max(p.u, L - BOL - (r.kind === "dmid" ? 11 : 6)); p.job = "bo-wait"; }
       p.u = Math.min(p.u, lim);
     }
+  } else if (!pressure) {
+    // nobody steps to the ball: the nearest defender holds their spot in the shape
+    const order = F.map(r => r.id).sort((a, b) => d2(T[a], B) - d2(T[b], B));
+    T[order[0]].job = "contain";
   } else {
     const kind = {}; for (const r of F) kind[r.id] = r.kind;
     const order = F.map(r => r.id).sort((a, b) => d2(T[a], B) - d2(T[b], B));
@@ -467,8 +579,61 @@ function defend(B, buildOut, form) {
   return T;
 }
 
+/* ---------- passing lanes ---------- */
+const LONG = 22;    // an open pass longer than this (yards) is drawn as a thin line: on, but a long pass
+const OPEN = 2.5;   // a pass is "on" when no defender is within this many yards of its line
+function laneClear(ax, ay, bx, by, defs) {
+  // Returns how safe the pass is, in yards: OPEN or more means it is on.
+  // A defender right next to the passer has no time to react, so they only block about a yard either side.
+  // A defender further down the line can step across, up to OPEN yards.
+  const dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy) || 1;
+  let m = 99;
+  for (const d of defs) {
+    let along = ((d.x - ax) * dx + (d.y - ay) * dy) / len;
+    if (along < 0) continue;                               // behind the passer
+    along = Math.min(len, along);
+    const off = Math.hypot(d.x - (ax + dx / len * along), d.y - (ay + dy / len * along));
+    const reach = Math.min(OPEN, 1 + 0.15 * along);
+    m = Math.min(m, off * OPEN / reach);
+  }
+  return m;
+}
+/* ---------- creative balls (only used when "Creative passes" is on) ---------- */
+// Can the passer lift the ball past the defenders right in front of them? Only someone within 4 yards and almost on the line stops it.
+function kickFree(ax, ay, bx, by, defs) {
+  const dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy) || 1;
+  for (const d of defs) {
+    const al = ((d.x - ax) * dx + (d.y - ay) * dy) / len;
+    if (al <= 0 || al > 4) continue;
+    if (Math.hypot(d.x - (ax + dx / len * al), d.y - (ay + dy / len * al)) < 0.8) return false;
+  }
+  return true;
+}
+// A pass bent around a defender. Tries a 3 and a 5 yard bend to each side; returns the bend point of the first one that gets through.
+function curlPass(ax, ay, bx, by, defs) {
+  const dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy) || 1;
+  if (len < 8 || len > 26) return null;
+  const nx = -dy / len, ny = dx / len;
+  for (const k of [3, -3, 5, -5]) {
+    const cx = (ax + bx) / 2 + nx * 2 * k, cy = (ay + by) / 2 + ny * 2 * k;
+    let m = 99, inside = true;
+    for (let i = 1; i <= 12 && inside; i++) {
+      const t = i / 12, px = (1 - t) * (1 - t) * ax + 2 * (1 - t) * t * cx + t * t * bx, py = (1 - t) * (1 - t) * ay + 2 * (1 - t) * t * cy + t * t * by;
+      if (px < 0.6 || px > W - 0.6 || py < 0.6 || py > L - 0.6) { inside = false; break; }
+      const reach = Math.min(OPEN, 1 + 0.15 * t * len);
+      for (const d of defs) m = Math.min(m, Math.hypot(d.x - px, d.y - py) * OPEN / reach);
+    }
+    if (inside && m >= OPEN) return { x: cx, y: cy };
+  }
+  return null;
+}
+
+// jobs that are already a deliberate run or cover; these players are not moved again
+const FIXED = new Set(["cm-cover", "wing-backpost", "wing-box", "st-nearpost", "st-backpost", "back-split", "cb-show"]);
+
 /* ---------- attacking shape ---------- */
-function attack(B, carrier, offside, buildOut, form) {
+// defs: the defenders in this team's frame ({x: u, y: v}); pressure: is a defender closing down the ball?
+function attack(B, carrier, offside, buildOut, form, defs, pressure, prev, creative) {
   const F = FORMS[form], ids = F.map(r => r.id), T = {};
   const has = k => F.some(r => r.kind === k);
   const three = has("cback"), wideBacks = !has("wing"), twoST = F.filter(r => r.kind === "st").length > 1;
@@ -482,6 +647,7 @@ function attack(B, carrier, offside, buildOut, form) {
   const ft = sstep(40, 48, bu);
   const f2 = sstep(38, 46, bu) * sstep(6, 12, Math.abs(bv));
   const stU = lerp(Math.min(offside - 0.8, L - 7), Math.min(offside - 0.6, L - 6), f2);
+  const fromBack = carrier === "GK" || kind[carrier] === "back" || kind[carrier] === "cback";   // a defender or the keeper has the ball
 
   for (const r of F) {
     const s = r.s, st = s * side;                       // st > 0: ball is on my side
@@ -499,24 +665,28 @@ function attack(B, carrier, offside, buildOut, form) {
         break;
       case "cback": T[r.id] = { u: split ? 10 : Math.max(8, hb - 3), v: clamp(0.2 * bv, -5, 5), job: split ? "cb-show" : "cb-anchor" }; break;
       case "wing": {
-        T[r.id] = { u: clamp(bu + 6 + 3 * up - 2 * away, 19, L - 7), v: s * (HW - 2), job: up > 0.5 ? "wing-ahead" : away > 0.5 ? "wing-far" : "wing-wide" };
+        T[r.id] = { u: clamp(bu + 6 + 3 * up - 2 * away, 21, L - 7), v: s * (HW - 2), job: up > 0.5 ? "wing-ahead" : away > 0.5 ? "wing-far" : "wing-wide" };
         const f = ft * away;
         if (f > 0) { T[r.id].u = lerp(T[r.id].u, L - 6, f); T[r.id].v = lerp(T[r.id].v, 6 * s, f); if (f > 0.5) T[r.id].job = "wing-backpost"; }
         break;
       }
-      case "cmid": T[r.id] = { u: clamp(bu - 5, 14, L - 18), v: clamp(0.5 * bv, -9, 9), job: split ? "cm-show" : "cm-support" }; break;
-      case "dmid": T[r.id] = { u: clamp(bu - 8, 12, L - 24), v: clamp(0.35 * bv, -7, 7), job: split ? "cm-show" : "dm-behind" }; break;
+      // When a defender has the ball, the mids get ahead of it and inside, to be the pass forward.
+      // When a mid or forward has it, they sit behind the ball as the safe pass.
+      case "cmid": T[r.id] = fromBack ? { u: clamp(bu + 4, 14, L - 15), v: clamp(0.45 * bv, -9, 9), job: "cm-show" }
+        : { u: clamp(bu - 5, three ? 16 : 14, L - 15), v: clamp(0.5 * bv, -9, 9), job: "cm-support" }; break;
+      case "dmid": T[r.id] = fromBack ? { u: clamp(bu + 2, 12, L - 24), v: clamp(0.35 * bv, -7, 7), job: "cm-show" }
+        : { u: clamp(bu - 7, 13, L - 24), v: clamp(0.35 * bv, -7, 7), job: "dm-behind" }; break;
       case "imid": {
         const t = clamp(s * bv / 8, -1, 1);
-        T[r.id] = { u: split ? 15 : clamp(bu + lerp(5, -4, (t + 1) / 2), 14, L - 12), v: clamp(0.4 * bv + s * 7, -13, 13),
-          job: split ? "cm-show" : t > 0.3 ? "cm-support" : t < -0.3 ? "imid-ahead" : "imid-level" };
+        T[r.id] = { u: split ? 15 : clamp(bu + (fromBack ? lerp(8, 3, (t + 1) / 2) : lerp(5, -4, (t + 1) / 2)), 14, L - 12), v: clamp(0.4 * bv + s * 7, -10, 10),
+          job: split || (fromBack && t > 0.3) ? "cm-show" : t > 0.3 ? "cm-support" : t < -0.3 ? "imid-ahead" : "imid-level" };
         break;
       }
       case "amid": T[r.id] = { u: clamp(bu + 7, 20, L - 12), v: clamp(0.5 * bv, -8, 8), job: "am-between" }; break;
       case "st":
         if (twoST) {
           const near = s === sgn(bv);
-          T[r.id] = { u: stU, v: lerp(clamp(0.3 * bv, -5, 5) + s * 6, s * (near ? 4 : 5), f2), job: f2 > 0.5 ? (near ? "st-nearpost" : "st-backpost") : "st-pair" };
+          T[r.id] = { u: stU, v: lerp(clamp(0.3 * bv, -5, 5) + s * 5, s * (near ? 4 : 5), f2), job: f2 > 0.5 ? (near ? "st-nearpost" : "st-backpost") : "st-pair" };
         } else {
           T[r.id] = { u: stU, v: lerp(clamp(0.3 * bv, -6, 6), sgn(bv) * 4, f2), job: f2 > 0.5 ? "st-nearpost" : "st-high" };
         }
@@ -525,17 +695,162 @@ function attack(B, carrier, offside, buildOut, form) {
   }
 
   // the player on the ball left their own spot: teammates fill in
-  if (!three && kind[carrier] === "back" && bu > T[carrier].u + 7) {
+  if (!three && kind[carrier] === "back" && bu > 30 && bu > T[carrier].u + 7) {   // only once the defender has carried it past halfway
     const cov = F.find(r => r.kind === "dmid") || F.find(r => r.kind === "cmid");
     const o = F.find(r => r.kind === "back" && r.id !== carrier);
     if (cov) T[cov.id] = { u: T[carrier].u, v: T[carrier].v * 0.55, job: "cm-cover" };
     if (o) { T[o.id].v *= 0.6; T[o.id].job = "back-rest"; }
   }
-  if (!twoST && kind[carrier] === "st" && has("wing") && bu < T[carrier].u - 9) {
-    const runU = Math.min(offside - 0.8, L - 7);
-    for (const r of F) if (r.kind === "wing") {
-      if (Math.abs(bv) < 3) T[r.id] = { u: runU, v: r.s * 11, job: "wing-run" };
-      else if (r.s !== sgn(bv)) T[r.id] = { u: runU, v: r.s * 6, job: "wing-run" };
+  if (!twoST && kind[carrier] === "st" && has("wing")) {
+    // the striker has dropped off their back line with the ball: the wingers go high, and stay wide
+    const runU = Math.min(offside - 0.8, L - 7), f = sstep(4, 12, runU - bu);
+    if (f > 0) for (const r of F) if (r.kind === "wing" && T[r.id].job !== "wing-backpost") {
+      T[r.id].u = lerp(T[r.id].u, runU, f); if (f > 0.5) T[r.id].job = "wing-run";
+    }
+  }
+  // the striker has the ball near their goal: both wingers come inside to attack the posts
+  if (kind[carrier] === "st" && has("wing")) {
+    const fb = sstep(40, 46, bu);
+    if (fb > 0) for (const r of F) if (r.kind === "wing") {
+      const w = T[r.id];
+      w.u = lerp(w.u, Math.min(offside - 0.6, L - 6), fb); w.v = lerp(w.v, r.s * 7, fb);
+      if (fb > 0.5) w.job = "wing-box";
+    }
+  }
+  // Get open. Each off-ball player keeps their spot if the ball can reach them.
+  // If a defender is in the way, they slide to the nearest spot where the pass is on.
+  // Under pressure that search starts next to the ball (come and show); with no pressure it starts from their normal spot.
+  if (!buildOut) {
+    const P = pressure, far = st => st < -0.25;
+    const okSpot = (c, id) => c.u >= 2 && c.u <= Math.min(L - 5, offside - 0.5) && Math.abs(c.v) <= HW - 1.5 &&
+      Math.hypot(c.u - bu, c.v - bv) >= 6 &&
+      ids.every(k => k === id || k === carrier || Math.hypot(T[k].u - c.u, T[k].v - c.v) >= 7);
+    const pick = (id, cands, pref, maxLen) => {
+      let best = null, bs = -1e9;
+      for (const c of cands) {
+        if (!okSpot(c, id)) continue;
+        if (maxLen && Math.hypot(c.u - bu, c.v - bv) > maxLen) continue;
+        const cl = laneClear(bu, bv, c.u, c.v, defs);
+        if (cl < OPEN + 0.4) continue;
+        const sc = Math.min(cl, 5) * 0.5 - Math.hypot(c.u - pref.u, c.v - pref.v);
+        if (sc > bs) { bs = sc; best = c; }
+      }
+      return best;
+    };
+    // Creative passes: a run into the space behind their back line, for a striker or a winger.
+    // The runner starts level with the last defender (onside). The ball is played to a spot about 5 yards behind the line.
+    // It is on if the passer can get it there (along the ground, or lifted over) and the runner gets there before any defender or the keeper.
+    const defsF = defs.slice(1), gk = defs[0];
+    const backLine = Math.max(...defsF.map(d => d.x));
+    const spaceRun = (r, base) => {
+      if (!creative || backLine > L - 12) return null;                    // no room behind them
+      const su = Math.min(offside - 0.8, L - 7), tu = Math.min(backLine + 5, L - 5);
+      if (tu - su < 4) return null;
+      const opts = [];
+      if (r.kind === "wing") opts.push({ sv: base.v, tv: r.s * (HW - 4), channel: false });           // down the line
+      else {
+        if (Math.abs(bv) > 8) {
+          // the channel on the ball side: start on the inside shoulder of their ball-side back, then spin in behind them toward the corner
+          const sd = sgn(bv), line0 = defsF.filter(d => d.x >= backLine - 3), fb = line0.reduce((a, d) => (d.y * sd > a.y * sd ? d : a), line0[0]);
+          opts.push({ sv: clamp(fb.y - sd * 2.5, -14, 14), tv: clamp(fb.y + sd * 1.5, -16, 16), channel: true });
+        }
+        const line = defsF.filter(d => d.x >= backLine - 3).map(d => d.y).sort((a, b) => a - b);
+        for (let i = 0; i + 1 < line.length; i++) if (line[i + 1] - line[i] >= 8) {                       // a gap between two of their backs
+          const m = (line[i] + line[i + 1]) / 2; if (Math.abs(m) <= 12) opts.push({ sv: clamp(m, -10, 10), tv: m, channel: false });
+        }
+      }
+      let best = null, bs = -1e9;
+      for (const o of opts) {
+        if (twoST && r.kind === "st" && o.sv * r.s < -2) continue;
+        const S0 = { u: su, v: o.sv }, G = { u: tu, v: o.tv };
+        if (Math.hypot(S0.u - bu, S0.v - bv) < 6) continue;
+        if (!ids.every(k => k === r.id || k === carrier || Math.hypot(T[k].u - S0.u, T[k].v - S0.v) >= 5)) continue;
+        const ln = Math.hypot(G.u - bu, G.v - bv); if (ln < 10 || ln > (P ? 26 : 30)) continue;
+        const ground = laneClear(bu, bv, G.u, G.v, defsF) >= OPEN;
+        const loft = !ground && ln >= 14 && kickFree(bu, bv, G.u, G.v, defsF);
+        if (!ground && !loft) continue;
+        const dR = Math.hypot(G.u - S0.u, G.v - S0.v), dD = Math.min(...defsF.map(d => Math.hypot(d.x - G.u, d.y - G.v)));
+        if (dR > dD + 2 || Math.hypot(gk.x - G.u, gk.y - G.v) < dR + 1) continue;   // the runner is already moving and facing goal; the defender has to turn
+        const sc = (ground ? 1 : 0) + (dD - dR) * 0.5 + (o.channel ? 0.5 : 0);
+        if (sc > bs) { bs = sc; best = { s: S0, t: G, loft, channel: o.channel }; }
+      }
+      return best;
+    };
+    for (const r of F) {
+      const id = r.id;
+      if (id === carrier || FIXED.has(T[id].job)) continue;
+      const base = T[id], st = r.s * side, cands = [];
+      let runInfo = null;
+      const len = Math.hypot(base.u - bu, base.v - bv);
+      const baseOpen = laneClear(bu, bv, base.u, base.v, defs) >= OPEN;
+      const grid = (u0, u1, v0, v1, du, dv) => { for (let u = u0; u <= u1 + 1e-6; u += du) for (let v = v0; v <= v1 + 1e-6; v += dv) cands.push({ u, v }); };
+      let got = null, job = null;
+      if (r.kind === "st") {
+        // The striker looks at every spot in the middle of the field, on their back line and in the pocket in front of it,
+        // and takes the best one where the pass is on: room from defenders, central, and not too long a pass.
+        const maxLen = P ? 20 : 24, CH = 10;
+        const halfOK = v => !twoST || v * r.s >= -2;
+        const nearDef = c => { let m = 99; for (const d of defs) m = Math.min(m, Math.hypot(d.x - c.u, d.y - c.v)); return m; };
+        const pv = prev && prev[id];
+        let best = null, bs = -1e9;
+        const consider = (c, pocket) => {
+          if (!halfOK(c.v) || !okSpot(c, id)) return;
+          const ln = Math.hypot(c.u - bu, c.v - bv); if (ln > maxLen) return;
+          const cl = laneClear(bu, bv, c.u, c.v, defs); if (cl < OPEN + 0.4) return;
+          const sc = Math.min(nearDef(c), 6) + 0.6 * Math.min(cl, 5) - 0.25 * Math.abs(c.v)
+            + (P ? -0.2 * Math.max(0, ln - 10) : 0.12 * (c.u - bu))          // under pressure a short pass, otherwise as high as possible
+            - 0.15 * Math.hypot(c.u - base.u, c.v - base.v)
+            + (pv && nearDef(c) >= 4 && Math.hypot(c.u - pv.u, c.v - pv.v) < 3 ? 1.2 : 0);   // if they are already standing about there, stay rather than hop
+          if (sc > bs) { bs = sc; best = { u: c.u, v: c.v, pocket }; }
+        };
+        for (let v = -CH; v <= CH; v += 1) consider({ u: base.u, v }, false);
+        // the pocket: past the first defenders (at least 9 yards ahead of the ball) and never back in our own half
+        for (let u = Math.max(bu + 9, 30); u <= base.u - 2; u += 1.5)
+          for (let v = Math.max(-CH, bv - 12); v <= Math.min(CH, bv + 12); v += 1.5) consider({ u, v }, true);
+        // Creative: with no pressure on the ball the striker would rather run in behind than come to feet.
+        // Under pressure the run is the fallback when nothing to feet is on.
+        const run = !P || !best ? spaceRun(r, base) : null;
+        if (run && (!best || !run.loft)) {
+          got = run.s; runInfo = run; job = run.channel ? "st-channel" : "st-run";
+        } else if (best) {
+          got = best;
+          job = best.pocket ? (P ? "st-check" : "st-pocket") : Math.hypot(best.u - base.u, best.v - base.v) > 1.5 ? "st-slide" : base.job;
+        } else {
+          // nothing is on: stay high, but step to the edge of the defenders' shadow so the next pass can find them
+          let bc = -1e9;
+          for (let v = Math.max(-CH, base.v - 6); v <= Math.min(CH, base.v + 6); v += 1) {
+            const c = { u: base.u, v }; if (!halfOK(v) || !okSpot(c, id)) continue;
+            const s2 = Math.min(laneClear(bu, bv, c.u, c.v, defs), 3) + 0.3 * Math.min(nearDef(c), 5) - 0.15 * Math.abs(v - base.v)
+              + (pv && Math.hypot(c.u - pv.u, c.v - pv.v) < 3 ? 1 : 0);
+            if (s2 > bc) { bc = s2; got = c; }
+          }
+          job = base.job;
+        }
+      } else {
+        if (baseOpen) continue;
+        if (r.kind === "wing" && !far(st)) {
+          const run = spaceRun(r, base);
+          if (run) { T[id] = { u: run.s.u, v: run.s.v, job: "run-behind", run: { u: run.t.u, v: run.t.v, loft: run.loft } }; continue; }
+        }
+        let pref = base;
+        const rail = r.kind === "wing" || (r.kind === "back" && wideBacks);
+        switch (r.kind) {
+          case "wing": grid(Math.max(8, bu - 8), L - 7, base.v, base.v, 1, 1); if (P && !far(st)) pref = { u: Math.max(8, bu), v: base.v }; break;
+          case "back":
+            if (wideBacks) { grid(Math.max(6, bu - 12), Math.min(L - 16, bu + 6), base.v, base.v, 1, 1); if (P && !far(st)) pref = { u: Math.max(6, bu - 2), v: base.v }; }
+            else grid(base.u - 5, Math.min(base.u + 5, bu - 4), base.v - 6, base.v + 6, 1, 2);
+            break;
+          case "cback": grid(base.u - 4, Math.min(base.u + 4, bu - 5), base.v - 6, base.v + 6, 1, 2); break;
+          case "cmid": case "dmid": grid(bu - 12, bu + 3, base.v - 10, base.v + 10, 1.5, 2); break;
+          case "imid": grid(bu - 10, bu + 9, base.v - 8, base.v + 8, 1.5, 2); break;
+          case "amid": grid(bu + 2, bu + 14, base.v - 10, base.v + 10, 1.5, 2); break;
+        }
+        got = pick(id, cands, pref, 0);
+        job = !got || Math.hypot(got.u - base.u, got.v - base.v) <= 1.5 ? base.job
+          : rail ? (P && got.u <= bu + 2 ? "wing-show" : "wing-open") : (P ? "mid-show" : "find-lane");
+      }
+      if (got) T[id] = { u: got.u, v: got.v, job };
+      if (got && runInfo) T[id].run = { u: runInfo.t.u, v: runInfo.t.v, loft: runInfo.loft };
     }
   }
   T[carrier] = { u: bu - CARRY, v: bv, job: carrier === "GK" && buildOut ? "carrier-bo" : "carrier" };
@@ -582,12 +897,21 @@ function compute(st) {
   const att = st.poss, def = other(att), fa = st.form[att], fd = st.form[def];
   const Ba = toTeam(att, st.ball.x, st.ball.y), Bd = toTeam(def, st.ball.x, st.ball.y);
   const buildOut = st.carrier === "GK" && Ba.u <= PA_D + 0.3 && Math.abs(Ba.v) <= PA_HW + 0.3;
-  const D = defend(Bd, buildOut, fd);
+  const pressure = st.pressure !== false && !buildOut;
+  const D = defend(Bd, buildOut, fd, pressure);
   const deep = rolesOf(fd).map(r => L - D[r].u).sort((a, b) => b - a);
   const offside = Math.max(L - BOL, deep[1], Ba.u);
-  const A = attack(Ba, st.carrier, offside, buildOut, fa);
+  const defs = rolesOf(fd).map(r => ({ x: L - D[r].u, y: -D[r].v }));   // defenders, seen in the attacking team's frame
+  // where this team's players were a moment ago (only used to stop the striker hopping between two equally good spots)
+  let prev = null;
+  if (st.prev && st.prev.team === att && st.prev.form === fa) { prev = {}; for (const r in st.prev.pos) prev[r] = toTeam(att, st.prev.pos[r].x, st.prev.pos[r].y); }
+  const creative = st.creative === true && !buildOut;
+  const A = attack(Ba, st.carrier, offside, buildOut, fa, defs, pressure, prev, creative);
   const pos = { [att]: {}, [def]: {} };
-  for (const r of rolesOf(fa)) pos[att][r] = { ...toField(att, A[r].u, A[r].v), job: A[r].job };
+  for (const r of rolesOf(fa)) {
+    pos[att][r] = { ...toField(att, A[r].u, A[r].v), job: A[r].job };
+    if (A[r].run) pos[att][r].run = { ...toField(att, A[r].run.u, A[r].run.v), loft: A[r].run.loft };
+  }
   for (const r of rolesOf(fd)) pos[def][r] = { ...toField(def, D[r].u, D[r].v), job: D[r].job };
   separate(pos, att, st.carrier, st.ball);
   for (const r of fieldIds(fa)) if (r !== st.carrier) {
@@ -599,7 +923,23 @@ function compute(st) {
     if (q.u > L - BOL - 0.3) Object.assign(p, toField(def, L - BOL - 0.3, q.v));
   }
   for (const t of TEAMS) for (const r in pos[t]) { const p = pos[t][r]; p.x = clamp(p.x, 0.8, W - 0.8); p.y = clamp(p.y, 0.6, L - 0.6); }
-  return { att, def, buildOut, offside, Ba, pos };
+  // which passes are on, measured on the final picture
+  const lanes = {}, dl = Object.values(pos[def]);
+  for (const r of rolesOf(fa)) if (r !== st.carrier) {
+    const p = pos[att][r], c = laneClear(st.ball.x, st.ball.y, p.x, p.y, dl);
+    const ln = Math.hypot(p.x - st.ball.x, p.y - st.ball.y);
+    // type: "ground" (a normal pass to feet), or a creative ball: "space" (for a runner), "curl" (bent round a defender), "loft" (over the top)
+    let lane = { clear: c, open: c >= OPEN, type: c >= OPEN ? "ground" : null, len: ln };
+    if (p.run) lane = { clear: OPEN, open: true, type: "space", loft: p.run.loft, target: { x: p.run.x, y: p.run.y }, len: Math.hypot(p.run.x - st.ball.x, p.run.y - st.ball.y) };
+    else if (!lane.open && creative) {
+      const cu = curlPass(st.ball.x, st.ball.y, p.x, p.y, dl);
+      if (cu) { lane.open = true; lane.type = "curl"; lane.ctrl = cu; }
+      else if (ln >= 14 && ln <= 30 && kickFree(st.ball.x, st.ball.y, p.x, p.y, dl) && Math.min(...dl.map(d => Math.hypot(d.x - p.x, d.y - p.y))) >= 5) { lane.open = true; lane.type = "loft"; }
+    }
+    lane.long = lane.open && lane.len > LONG;
+    lanes[r] = lane;
+  }
+  return { att, def, buildOut, offside, Ba, pos, lanes, pressure, creative };
 }
 
 /* ---------- view ---------- */
@@ -617,19 +957,78 @@ for (const t of TEAMS) {
   arrowEl[t] = mk("line", { class: `shift ${t}`, "marker-end": `url(#ah-${t})`, display: "none" }, $("ghosts"));
 }
 
+const laneEls = [];
+for (let i = 0; i < 7; i++) laneEls.push({
+  path: mk("path", { class: "lane", display: "none" }, $("lanes")),
+  run: mk("line", { class: "lane-run", "marker-end": "url(#ah-chalk)", display: "none" }, $("lanes")),
+  ring: mk("circle", { class: "lane-target", r: 12, display: "none" }, $("lanes")),
+  tag: mk("text", { class: "lane-tag", display: "none" }, $("lanes"))
+});
+const LANE_TAG = { curl: "CURL", loft: "OVER THE TOP", space: "INTO SPACE" };
+
+/* ---------- tracking session ----------
+   While a session is on, every move of the chosen Purple position is painted onto a hidden canvas as a wide, faint, light green stroke.
+   Strokes add up, so places the player visits often get brighter. The canvas is shown behind the field lines.
+   It is cleared by Offense/Defense (or Purple ball/Orange ball), by choosing a different position, by Stop, and by reloading the page. */
+const trailCv = document.createElement("canvas"); trailCv.width = 450; trailCv.height = 660;
+const tctx = trailCv.getContext("2d"), trailImg = $("trail");
+let trackLast = null, trailDirty = false, trailFlushT = 0;
+function flushTrail(force) {
+  const now = performance.now();
+  if (!force && now - trailFlushT < 220) return;
+  trailFlushT = now; trailDirty = false;
+  const url = trailCv.toDataURL("image/png");
+  trailImg.setAttribute("href", url); trailImg.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", url);
+}
+function clearTrail() { tctx.clearRect(0, 0, 450, 660); trackLast = null; flushTrail(true); }
+function trackStep() {
+  const tr = state.track;
+  if (!tr.on || !tr.role) return;
+  const d = disp.blue[tr.role];
+  if (!d) { trackLast = null; return; }
+  if (!trackLast) { trackLast = { x: d.x, y: d.y }; return; }
+  const dx = d.x - trackLast.x, dy = d.y - trackLast.y, dist = Math.hypot(dx, dy);
+  if (dist < 0.35) return;
+  if (dist < 12) {
+    // paint in half-yard pieces so a fast move and a slow move leave the same amount of shading
+    const n = Math.ceil(dist / 0.5);
+    tctx.lineCap = "round"; tctx.lineWidth = 30; tctx.strokeStyle = "rgba(217,255,168,0.035)";
+    for (let k = 0; k < n; k++) {
+      const a = k / n, b = (k + 1) / n;
+      tctx.beginPath();
+      tctx.moveTo((trackLast.x + dx * a) * 10 + 25, (trackLast.y + dy * a) * 10 + 30);
+      tctx.lineTo((trackLast.x + dx * b) * 10 + 25, (trackLast.y + dy * b) * 10 + 30);
+      tctx.stroke();
+    }
+    trailDirty = true;
+  }
+  trackLast = { x: d.x, y: d.y };
+}
+function applyTrack() {
+  const tr = state.track, have = roles("blue");
+  $("track-btn").textContent = tr.on ? "Stop tracking session" : "Start tracking session";
+  $("track-btn").setAttribute("aria-pressed", String(tr.on));
+  $("track-pick").hidden = !tr.on;
+  trailImg.setAttribute("display", tr.on ? "inline" : "none");
+  $("track-chips").innerHTML = have.map(r => `<button type="button" class="chip tchip" data-role="${r}" aria-pressed="${tr.role === r}" title="${NAMES[r]}">${r}</button>`).join("");
+  $("track-note").textContent = !tr.on ? "" : !tr.role ? "Pick the position to track."
+    : have.includes(tr.role) ? `Tracking Purple ${NAMES[tr.role].toLowerCase()}. The light green shading builds up wherever they go.`
+    : `Purple's ${state.form.blue} has no ${NAMES[tr.role].toLowerCase()}. Pick another position, or change the formation back.`;
+  for (const r of have) if (els.blue[r]) els.blue[r].classList.toggle("trk", tr.on && tr.role === r);
+}
 const start = () => ({ poss: "blue", carrier: central(state ? state.form.blue : "2-3-1"), ball: { x: 16, y: 32 } });
 let state = null;
-state = Object.assign(start(), { follow: "ALL", shape: true, form: { blue: "2-3-1", orange: "2-3-1" } });
+state = Object.assign(start(), { follow: "ALL", shape: true, form: { blue: "2-3-1", orange: "2-3-1" }, mode: "free", side: "offense", speed: 0.25, ballSpeed: 0.5, bonus: true, settingsOpen: false, pressure: true, lanesOn: true, actsOn: true, creative: false, track: { on: false, role: null } });
 const roles = t => rolesOf(state.form[t]);
 let centerBase = {}, res = null;
 const disp = { blue: {}, orange: {} };
 const dispBall = { ...state.ball };
 
 function rebase() {
-  for (const p of TEAMS) centerBase[p] = compute({ poss: p, carrier: central(state.form[p]), ball: { x: HW, y: L / 2 }, form: state.form });
+  for (const p of TEAMS) centerBase[p] = compute({ poss: p, carrier: central(state.form[p]), ball: { x: HW, y: L / 2 }, form: state.form, pressure: state.pressure, creative: state.creative });
 }
 function buildPlayers() {
-  const host = $("players"); host.textContent = "";
+  const host = $("players"); host.textContent = ""; trackLast = null;
   for (const t of ["orange", "blue"]) {
     els[t] = {}; disp[t] = {};
     for (const r of roles(t)) {
@@ -638,6 +1037,7 @@ function buildPlayers() {
       mk("circle", { class: "sh", cx: 1.4, cy: 2.4, r: 17.5 }, g);
       mk("circle", { class: "body", r: 17.5 }, g);
       mk("text", { class: "lbl", y: 4.8 }, g).textContent = r;
+      mk("text", { class: "act", y: 30.5 }, g);
       els[t][r] = g;
       disp[t][r] = { x: res.pos[t][r].x, y: res.pos[t][r].y };
     }
@@ -659,26 +1059,69 @@ function buildCarrier() {
 }
 
 let drag = null, raf = 0, lastT = 0;
+// Game speed mode: the ball travels about one screen inch per second at 100%.
+// Attackers move at 75% of that and defenders at 50%. "flight" is true while a pass is on its way.
+let flight = false;
+let runPass = false, chasing = false;   // a pass into space: the receiver runs onto the ball instead of waiting for it
+const SLOW = 0.75;   // everything runs 25% slower than one screen inch per second
+const DEF_K = 0.5;    // defenders move at half the base speed
+const PASS = 1.4;   // a passed ball moves 40% faster than the base speed; players are unchanged
+const INCH = window.matchMedia && window.matchMedia("(pointer: coarse)").matches ? 140 : 96; // CSS px per real inch, roughly
+const stepTo = (d, tg, step) => {
+  const dx = tg.x - d.x, dy = tg.y - d.y, dd = Math.hypot(dx, dy);
+  if (dd <= step || dd < 0.01) { d.x = tg.x; d.y = tg.y; return false; }
+  d.x += dx / dd * step; d.y += dy / dd * step; return true;
+};
 function schedule() { if (!raf) raf = requestAnimationFrame(frame); }
 function frame(ts) {
   raf = 0;
   const dt = lastT ? Math.min(0.05, (ts - lastT) / 1000) : 1 / 60;
   lastT = ts;
-  const fast = drag && drag.moved, still = reduceMotion.matches;
+  const dragging = drag && drag.moved;
   let moving = false;
-  for (const t of TEAMS) for (const r of roles(t)) {
-    const tg = res.pos[t][r], d = disp[t][r];
-    const carrier = t === res.att && r === state.carrier;
-    const tau = still ? 0 : fast ? (carrier ? 0 : 0.11) : 0.2;
-    const k = tau ? 1 - Math.exp(-dt / tau) : 1;
-    d.x += (tg.x - d.x) * k; d.y += (tg.y - d.y) * k;
-    if (Math.abs(tg.x - d.x) > 0.01 || Math.abs(tg.y - d.y) > 0.01) moving = true; else { d.x = tg.x; d.y = tg.y; }
+  if (state.mode === "game") {
+    const unit1 = INCH / (svg.getBoundingClientRect().width / 45) * SLOW;   // yards per second at 100%
+    const attK = DEF_K * (state.bonus ? 1.25 : 1);                          // offense bonus: 25% faster than the defense
+    const base = unit1 * state.speed;                                       // the speed picker scales the players only
+    if (dragging) { dispBall.x = state.ball.x; dispBall.y = state.ball.y; }
+    else {
+      const ballMoving = stepTo(dispBall, state.ball, (flight ? unit1 * PASS * state.ballSpeed : base * attK) * dt);
+      if (!ballMoving) { flight = false; runPass = false; }
+      moving = ballMoving;
+    }
+    for (const t of TEAMS) for (const r of roles(t)) {
+      const d = disp[t][r];
+      if (t === res.att && r === state.carrier) {
+        // The receiver waits for a pass to feet, and runs onto a pass into space. Once they have the ball they stay on it.
+        const spot = { x: clamp(dispBall.x, 0.8, W - 0.8), y: clamp(dispBall.y + (t === "blue" ? CARRY : -CARRY), 0.6, L - 0.6) };
+        if (dragging) { d.x = spot.x; d.y = spot.y; chasing = false; }
+        else if (flight && runPass) {
+          const dest = { x: clamp(state.ball.x, 0.8, W - 0.8), y: clamp(state.ball.y + (t === "blue" ? CARRY : -CARRY), 0.6, L - 0.6) };
+          if (stepTo(d, dest, base * attK * 1.3 * dt)) moving = true;
+        } else if (!flight) {
+          if (chasing && Math.hypot(d.x - spot.x, d.y - spot.y) > 0.3) { if (stepTo(d, spot, base * attK * 1.3 * dt)) moving = true; else chasing = false; }
+          else { d.x = spot.x; d.y = spot.y; chasing = false; }
+        }
+        continue;
+      }
+      if (stepTo(d, res.pos[t][r], base * (t === res.att ? attK : DEF_K) * dt)) moving = true;
+    }
+  } else {
+    const still = reduceMotion.matches;
+    for (const t of TEAMS) for (const r of roles(t)) {
+      const tg = res.pos[t][r], d = disp[t][r];
+      const carrier = t === res.att && r === state.carrier;
+      const tau = still ? 0 : dragging ? (carrier ? 0 : 0.11) : 0.2;
+      const k = tau ? 1 - Math.exp(-dt / tau) : 1;
+      d.x += (tg.x - d.x) * k; d.y += (tg.y - d.y) * k;
+      if (Math.abs(tg.x - d.x) > 0.01 || Math.abs(tg.y - d.y) > 0.01) moving = true; else { d.x = tg.x; d.y = tg.y; }
+    }
+    const tb = still || dragging ? 0 : 0.12, kb = tb ? 1 - Math.exp(-dt / tb) : 1;
+    dispBall.x += (state.ball.x - dispBall.x) * kb; dispBall.y += (state.ball.y - dispBall.y) * kb;
+    if (Math.abs(state.ball.x - dispBall.x) > 0.01 || Math.abs(state.ball.y - dispBall.y) > 0.01) moving = true;
   }
-  const tb = still || fast ? 0 : 0.12, kb = tb ? 1 - Math.exp(-dt / tb) : 1;
-  dispBall.x += (state.ball.x - dispBall.x) * kb; dispBall.y += (state.ball.y - dispBall.y) * kb;
-  if (Math.abs(state.ball.x - dispBall.x) > 0.01 || Math.abs(state.ball.y - dispBall.y) > 0.01) moving = true;
   draw();
-  if (moving) schedule(); else lastT = 0;
+  if (moving) schedule(); else { lastT = 0; if (trailDirty) flushTrail(true); }
 }
 
 const pt = p => `${(p.x * S).toFixed(1)},${(p.y * S).toFixed(1)}`;
@@ -697,6 +1140,7 @@ const line = (t, kinds) => {
 };
 
 function draw() {
+  trackStep(); if (trailDirty) flushTrail(false);
   for (const t of TEAMS) for (const r of roles(t)) {
     const d = disp[t][r];
     els[t][r].setAttribute("transform", `translate(${(d.x * S).toFixed(2)} ${(d.y * S).toFixed(2)})`);
@@ -711,6 +1155,58 @@ function draw() {
       unitEl[t].mid.setAttribute("points", attacking ? "" : line(t, ["wing", "cmid", "imid"]));
     }
   }
+  const laneRoles = state.lanesOn ? roles(res.att).filter(r => r !== state.carrier) : [];
+  const defsNow = Object.values(res.pos[res.def]);
+  laneEls.forEach((E, i) => {
+    for (const k in E) E[k].setAttribute("display", "none");
+    const r = laneRoles[i], d = r && disp[res.att][r], ln = r && res.lanes[r];
+    if (!d || !ln) return;
+    const space = ln.type === "space", end = space ? ln.target : d;
+    const dx = end.x - dispBall.x, dy = end.y - dispBall.y, len = Math.hypot(dx, dy);
+    if (len < 4.2) return;
+    const ex = dx / len, ey = dy / len;
+    const sx = dispBall.x + ex * 1.2, sy = dispBall.y + ey * 1.2, fx = space ? end.x : end.x - ex * 2.1, fy = space ? end.y : end.y - ey * 2.1;
+    const P2 = (x, y) => `${(x * S).toFixed(1)} ${(y * S).toFixed(1)}`;
+    if (!ln.open || ln.type === "ground") {
+      E.path.setAttribute("class", "lane " + (ln.open ? (ln.long ? "open long" : "open") : "blocked"));
+      E.path.setAttribute("d", `M${P2(sx, sy)}L${P2(fx, fy)}`);
+    } else {
+      // creative balls are drawn as curves: a real bend for a curl, a big arc for a ball over the top, a gentle one into space
+      let cx, cy;
+      if (ln.type === "curl") { cx = ln.ctrl.x; cy = ln.ctrl.y; }
+      else {
+        const lofted = ln.type === "loft" || ln.loft, bow = (lofted ? 0.2 : 0.09) * len, mx = (sx + fx) / 2, my = (sy + fy) / 2;
+        // bow to whichever side keeps the curve on the field and furthest from the defenders
+        const bend = sg => {
+          const bx = mx - ey * sg * 2 * bow, by = my + ex * sg * 2 * bow; let m = 99, inside = true;
+          for (let k = 1; k <= 8; k++) {
+            const t = k / 8, px = (1 - t) * (1 - t) * sx + 2 * (1 - t) * t * bx + t * t * fx, py = (1 - t) * (1 - t) * sy + 2 * (1 - t) * t * by + t * t * fy;
+            if (px < 0.8 || px > W - 0.8 || py < 0.8 || py > L - 0.8) inside = false;
+            for (const q of defsNow) m = Math.min(m, Math.hypot(q.x - px, q.y - py));
+          }
+          return { bx, by, score: inside ? m : m - 100 };
+        };
+        const b1 = bend(1), b2 = bend(-1), bb = b1.score >= b2.score ? b1 : b2;
+        cx = bb.bx; cy = bb.by;
+      }
+      E.path.setAttribute("class", "lane creative " + ln.type + (ln.loft ? " loft" : ""));
+      E.path.setAttribute("d", `M${P2(sx, sy)}Q${P2(cx, cy)} ${P2(fx, fy)}`);
+      const tx = 0.25 * sx + 0.5 * cx + 0.25 * fx, ty = 0.25 * sy + 0.5 * cy + 0.25 * fy;
+      E.tag.textContent = space && ln.loft ? "OVER THE TOP" : LANE_TAG[ln.type];
+      E.tag.setAttribute("x", (clamp(tx, 4.5, W - 4.5) * S).toFixed(1)); E.tag.setAttribute("y", (ty * S - 5).toFixed(1));
+      E.tag.setAttribute("display", "inline");
+      if (space) {
+        E.ring.setAttribute("cx", (end.x * S).toFixed(1)); E.ring.setAttribute("cy", (end.y * S).toFixed(1)); E.ring.setAttribute("display", "inline");
+        const rx = end.x - d.x, ry = end.y - d.y, rl = Math.hypot(rx, ry);
+        if (rl > 3.4) {
+          E.run.setAttribute("x1", ((d.x + rx / rl * 2) * S).toFixed(1)); E.run.setAttribute("y1", ((d.y + ry / rl * 2) * S).toFixed(1));
+          E.run.setAttribute("x2", ((end.x - rx / rl * 1.3) * S).toFixed(1)); E.run.setAttribute("y2", ((end.y - ry / rl * 1.3) * S).toFixed(1));
+          E.run.setAttribute("display", "inline");
+        }
+      }
+    }
+    E.path.setAttribute("display", "inline");
+  });
   const f = state.follow;
   for (const t of TEAMS) {
     const g = f === "ALL" ? null : centerBase[state.poss].pos[t][f], d = disp[t][f];
@@ -739,6 +1235,14 @@ function statusText() {
   const lane = v < -7 ? "left side" : v > 7 ? "right side" : "center";
   return `${a} ${NAMES[state.carrier].toLowerCase()} has the ball · ${third}, ${lane}`;
 }
+function laneText(l) {
+  if (!l.open) return "blocked by a defender";
+  const yd = `${Math.round(l.len)} yd`;
+  if (l.type === "space") return l.loft ? `over the top, into the space they run to (${yd})` : `into the space they run to (${yd})`;
+  if (l.type === "curl") return `on with a curled ball round the defender (${yd})`;
+  if (l.type === "loft") return `on with a ball over the top (${yd})`;
+  return l.long ? `on, but a long one (${yd})` : "on";
+}
 function teamSize(P, members) {
   const xs = members.map(r => P[r].x), ys = members.map(r => P[r].y);
   return { w: Math.round(Math.max(...xs) - Math.min(...xs)), d: Math.round(Math.max(...ys) - Math.min(...ys)) };
@@ -752,35 +1256,58 @@ function renderPanel() {
     const attacking = t === res.att, mode = attacking ? "Attacking" : "Defending", form = state.form[t];
     if (f === "ALL") {
       const s = teamSize(res.pos[t], attacking ? fieldIds(form) : blockIds(form));
-      rows.push(`<div class="row"><span class="tag ${t}">${TEAM[t]}</span><span class="mode ${t}">${mode} · ${form}</span><p>${attacking ? ATT_TEAM : DEF_TEAM}<span class="size">${attacking ? "Field players spread" : "Defenders and mids squeezed"}: ${s.w} yd wide, ${s.d} yd deep</span></p></div>`);
+      rows.push(`<div class="row"><span class="tag ${t}">${TEAM[t]}</span><span class="mode ${t}">${mode} · ${form}</span><p>${attacking ? ATT_TEAM : res.pressure || res.buildOut ? DEF_TEAM : DEF_TEAM_HOLD}<span class="size">${attacking ? "Field players spread" : "Defenders and mids squeezed"}: ${s.w} yd wide, ${s.d} yd deep${attacking ? ` · Passes on: ${Object.values(res.lanes).filter(l => l.open).length} of ${Object.keys(res.lanes).length}${(() => { const v = Object.values(res.lanes), lg = v.filter(l => l.long).length, cr = v.filter(l => l.open && l.type !== "ground").length, bits = []; if (lg) bits.push(`${lg} long`); if (cr) bits.push(`${cr} creative`); return bits.length ? ` (${bits.join(", ")})` : ""; })()}` : ""}</span></p></div>`);
     } else if (!res.pos[t][f]) {
       rows.push(`<div class="row"><span class="tag ${t}">${TEAM[t]}</span><span class="mode ${t}">${mode} · ${form}</span><p>${TEAM[t]}'s ${form} has no ${NAMES[f].toLowerCase()}.</p></div>`);
     } else {
       anyGhost = true;
       const job = res.pos[t][f].job, tip = (attacking ? ATT_TIPS : DEF_TIPS)[job] || "";
-      rows.push(`<div class="row"><span class="tag ${t}">${TEAM[t]} ${f}</span><span class="mode ${t}">${NAMES[f]} · ${mode}</span><p>${tip}</p></div>`);
+      const ln = attacking && res.lanes[f] ? `<span class="size">Pass from the ball: ${laneText(res.lanes[f])}</span>` : "";
+      rows.push(`<div class="row"><span class="tag ${t}">${TEAM[t]} ${f}</span><span class="mode ${t}">${NAMES[f]} · ${mode}</span><p>${tip}${ln}</p></div>`);
     }
   }
   $("rows").innerHTML = rows.join("");
   $("legend").hidden = !anyGhost;
+  for (const t of TEAMS) for (const r of roles(t)) {
+    const a = els[t][r] && els[t][r].querySelector(".act");
+    if (a) a.textContent = t === res.att && r === state.carrier ? "" : ((t !== res.att && ACT_DEF[res.pos[t][r].job]) || ACT[res.pos[t][r].job] || "");
+  }
   $("carrier").value = `${state.poss}:${state.carrier}`;
 }
 function applyFollow() {
   svg.classList.toggle("following", state.follow !== "ALL");
-  document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.role === state.follow)));
+  document.querySelectorAll("#chips .chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.role === state.follow)));
   for (const t of ["orange", "blue"]) for (const r of roles(t)) {
     const on = state.follow === r;
     els[t][r].classList.toggle("on", on);
     if (on) $("players").appendChild(els[t][r]);
   }
 }
-function update() { res = compute(state); renderPanel(); schedule(); }
+function update() {
+  state.prev = res ? { team: res.att, form: state.form[res.att], pos: res.pos[res.att] } : null;
+  res = compute(state); renderPanel(); schedule();
+}
 function announce() { $("live").textContent = statusText(); }
 
 /* ---------- actions ---------- */
+// A pass into space: the ball goes to the ring and waits there. The player whose run it is keeps running until they reach it.
+function passToSpace(r) {
+  const t = res.att, ln = res.lanes[r];
+  if (!ln || ln.type !== "space") return false;
+  state.poss = t; state.carrier = r; state.ball = clampBall(ln.target);
+  if (state.mode === "game") { runPass = true; chasing = true; flight = true; }
+  update();
+  return true;
+}
 function giveBall(t, r) {
+  if (state.mode === "game" && t === res.att && passToSpace(r)) return;   // tapping a runner plays it into their space too
   state.poss = t; state.carrier = r;
-  if (r === "GK") state.ball = clampBall(toField(t, 4.5, 0));
+  if (state.mode === "game") {
+    // a pass to feet: the ball travels to where that player is standing right now
+    const d = disp[t][r];
+    state.ball = clampBall({ x: d.x, y: d.y + (t === "blue" ? -CARRY : CARRY) }); runPass = false; chasing = false;
+    flight = true;
+  } else if (r === "GK") state.ball = clampBall(toField(t, 4.5, 0));
   else { const d = disp[t][r]; state.ball = clampBall({ x: d.x, y: d.y + (t === "blue" ? -CARRY : CARRY) }); }
   update();
 }
@@ -794,6 +1321,32 @@ function setPoss(t) {
   state.carrier = nearest(t, disp[t]); state.poss = t;
   update(); announce();
 }
+function startGame() {
+  const t = state.side === "offense" ? "blue" : "orange";
+  state.poss = t; state.carrier = "GK"; state.ball = clampBall(toField(t, 4.5, 0)); flight = false; state.prev = null; trackLast = null;
+  res = compute(state);
+  for (const tt of TEAMS) for (const r of roles(tt)) { disp[tt][r].x = res.pos[tt][r].x; disp[tt][r].y = res.pos[tt][r].y; }
+  dispBall.x = state.ball.x; dispBall.y = state.ball.y;
+  renderPanel(); draw(); announce();
+}
+function applyMode() {
+  const game = state.mode === "game";
+  $("mode-free").setAttribute("aria-pressed", String(!game));
+  $("mode-game").setAttribute("aria-pressed", String(game));
+  $("poss").hidden = game; $("side").hidden = !game; $("speed-wrap").hidden = !game;
+  $("speed-wrap").setAttribute("aria-expanded", String(state.settingsOpen));
+  $("speed-panel").hidden = !game || !state.settingsOpen;
+  $("side-offense").setAttribute("aria-pressed", String(state.side === "offense"));
+  $("side-defense").setAttribute("aria-pressed", String(state.side === "defense"));
+  $("hint").textContent = (game
+    ? "You are Purple. Tap a player to pass to them, or tap an Orange player to lose the ball. Drag the ball to dribble."
+    : "Drag the ball to move it. Tap any player to give them the ball. Tap a keeper for a goal kick.")
+    + (state.creative ? " Tap a yellow ring to play the ball into that space." : "");
+}
+function setMode(m) {
+  state.mode = m; flight = false; applyMode();
+  if (m === "game") startGame(); else update();
+}
 function setForm(t, f) {
   state.form[t] = f;
   if (state.poss === t && !roles(t).includes(state.carrier)) {
@@ -801,7 +1354,7 @@ function setForm(t, f) {
     state.carrier = nearest(t, compute(state).pos[t]);
   }
   rebase(); res = compute(state);
-  buildPlayers(); buildChips(); buildCarrier(); applyFollow(); renderPanel(); draw();
+  buildPlayers(); buildChips(); buildCarrier(); applyFollow(); applyTrack(); renderPanel(); draw();
   $("live").textContent = `${TEAM[t]} now in a ${f}.`;
 }
 
@@ -818,8 +1371,13 @@ svg.addEventListener("pointerdown", e => {
   for (const t of TEAMS) for (const r of roles(t)) { const d = disp[t][r], dd = Math.hypot(d.x - p.x, d.y - p.y); if (dd < best) { best = dd; hit = { t, r }; } }
   const bd = Math.hypot(dispBall.x - p.x, dispBall.y - p.y);
   const onBall = bd < 2.2 && (!hit || bd <= best + 0.6);
+  // a tap on a yellow ring plays the ball into that space
+  let ring = null, rd = 2.8;
+  if (state.lanesOn) for (const r in res.lanes) { const ln = res.lanes[r]; if (ln.type !== "space") continue; const dd = Math.hypot(ln.target.x - p.x, ln.target.y - p.y); if (dd < rd) { rd = dd; ring = r; } }
+  if (!onBall && ring && (!hit || rd <= best)) { passToSpace(ring); announce(); e.preventDefault(); return; }
   if (!onBall && hit) { if (!(hit.t === state.poss && hit.r === state.carrier)) giveBall(hit.t, hit.r); }
-  else if (!onBall) { state.ball = clampBall(p); update(); }
+  else if (!onBall) { flight = false; state.ball = clampBall(p); update(); }
+  else if (state.mode === "game") { flight = false; state.ball = { x: dispBall.x, y: dispBall.y }; update(); }
   drag = { id: e.pointerId, sx: p.x, sy: p.y, ox: state.ball.x - p.x, oy: state.ball.y - p.y, moved: false };
   try { svg.setPointerCapture(e.pointerId); } catch (_) {}
   svg.classList.add("grabbing");
@@ -844,13 +1402,13 @@ svg.addEventListener("keydown", e => {
   const step = e.shiftKey ? 4 : 1;
   const mv = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
   if (!mv) return;
-  e.preventDefault(); svg.classList.remove("idle");
+  e.preventDefault(); svg.classList.remove("idle"); flight = false;
   state.ball = clampBall({ x: state.ball.x + mv[0], y: state.ball.y + mv[1] });
   update(); announce();
 });
 
 for (const t of TEAMS) {
-  $(`poss-${t}`).addEventListener("click", () => setPoss(t));
+  $(`poss-${t}`).addEventListener("click", () => { if (t !== state.poss) clearTrail(); setPoss(t); });
   const fs = $(`form-${t}`);
   fs.innerHTML = FORM_LIST.map(f => `<option value="${f}">${f}</option>`).join("");
   fs.value = state.form[t];
@@ -860,13 +1418,38 @@ $("chips").addEventListener("click", e => {
   const c = e.target.closest(".chip"); if (!c) return;
   state.follow = c.dataset.role; applyFollow(); renderPanel(); draw();
 });
+for (const m of ["basic", "creative"]) $(`pass-${m}`).addEventListener("click", () => {
+  state.creative = m === "creative";
+  $("pass-basic").setAttribute("aria-pressed", String(!state.creative)); $("pass-creative").setAttribute("aria-pressed", String(state.creative));
+  rebase(); update(); applyMode(); announce();
+});
+$("pressure").addEventListener("change", e => { state.pressure = e.target.checked; rebase(); update(); announce(); });
+$("lanes-on").addEventListener("change", e => { state.lanesOn = e.target.checked; draw(); });
+$("acts-on").addEventListener("change", e => { state.actsOn = e.target.checked; svg.classList.toggle("noact", !state.actsOn); });
 $("shape").addEventListener("change", e => { state.shape = e.target.checked; svg.classList.toggle("noshape", !state.shape); draw(); });
 $("carrier").addEventListener("change", () => { const [t, r] = $("carrier").value.split(":"); giveBall(t, r); announce(); });
-$("reset").addEventListener("click", () => { Object.assign(state, start()); update(); announce(); });
+$("reset").addEventListener("click", () => { if (state.mode === "game") { startGame(); return; } Object.assign(state, start()); update(); announce(); });
+$("mode-free").addEventListener("click", () => setMode("free"));
+$("mode-game").addEventListener("click", () => setMode("game"));
+for (const sd of ["offense", "defense"]) $(`side-${sd}`).addEventListener("click", () => { state.side = sd; clearTrail(); applyMode(); startGame(); });
+$("track-btn").addEventListener("click", () => {
+  const tr = state.track;
+  tr.on = !tr.on; tr.role = null; clearTrail(); applyTrack(); draw();
+  $("live").textContent = tr.on ? "Tracking session started. Pick a position." : "Tracking session stopped.";
+});
+$("track-chips").addEventListener("click", e => {
+  const c = e.target.closest(".tchip"); if (!c || c.dataset.role === state.track.role) return;
+  state.track.role = c.dataset.role; clearTrail(); applyTrack(); draw();
+});
+$("speed-wrap").addEventListener("click", () => { state.settingsOpen = !state.settingsOpen; applyMode(); });
+$("speed").addEventListener("change", e => { state.speed = +e.target.value; schedule(); });
+$("bonus").addEventListener("change", e => { state.bonus = e.target.checked; schedule(); });
+$("ball-speed").addEventListener("change", e => { state.ballSpeed = +e.target.value; schedule(); });
 
-window.ShapeBoard = { compute, FORMS, FORM_LIST, state: () => JSON.parse(JSON.stringify(state)) };
+window.ShapeBoard = { compute, trailInk: () => { const d = tctx.getImageData(0, 0, 450, 660).data; let n = 0, mx = 0; for (let i = 3; i < d.length; i += 4) { if (d[i] > 0) n++; if (d[i] > mx) mx = d[i]; } return { painted: n, maxAlpha: mx }; }, laneClear, kickFree, curlPass, res: () => res, probe: () => ({ ball: { ...dispBall }, disp: JSON.parse(JSON.stringify(disp)), flight, att: res.att }), FORMS, FORM_LIST, state: () => JSON.parse(JSON.stringify(state)) };
 rebase(); res = compute(state);
-buildPlayers(); buildChips(); buildCarrier(); applyFollow(); renderPanel(); draw();
+buildPlayers(); buildChips(); buildCarrier(); applyFollow(); applyTrack(); applyMode(); renderPanel(); draw();
+setMode("game");   // the app opens in Game speed
 })();
 </script>
 
